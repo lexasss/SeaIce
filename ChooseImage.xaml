@@ -1,0 +1,36 @@
+﻿<Window x:Class="SeaIce.ChooseImage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SeaIce"
+        mc:Ignorable="d"
+        Title="Select an image"
+        Height="600"
+        Width="200"
+        MinWidth="120"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="MinWidth" Value="64"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ListView x:Name="lsvImages" Grid.Row="0"
+                  VirtualizingPanel.IsVirtualizing="False"
+                  MouseDoubleClick="Images_MouseDoubleClick"/>
+        <WrapPanel Grid.Row="1"
+                   HorizontalAlignment="Center">
+            <Button Content="OK" Click="OK_Click"/>
+            <Button Content="Cancel" Click="Cancel_Click"/>
+        </WrapPanel>
+    </Grid>
+</Window>
