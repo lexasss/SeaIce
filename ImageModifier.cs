@@ -28,7 +28,7 @@ internal class ImageModifier
         _size = new Size(_bitmap.PixelWidth, _bitmap.PixelHeight);
 
         _pixels = ReadPixels(_bitmap);
-        _scale = CreateScale(_pixels);
+        _scale = CreateScale(_pixels, _size);
 
         Name = ThinknessImageService.CreateName(filename);
 
@@ -42,10 +42,14 @@ internal class ImageModifier
     public double GetIceAmount()
     {
         double amount = 0;
+        int minX = (int)(MAP_RECT_MIN.X * _size.Width);
+        int maxX = (int)(MAP_RECT_MAX.X * _size.Width);
+        int minY = (int)(MAP_RECT_MIN.Y * _size.Height);
+        int maxY = (int)(MAP_RECT_MAX.Y * _size.Height);
 
-        for (int x = (int)MAP_RECT_MIN.X; x < (int)MAP_RECT_MAX.X; x += 1)
+        for (int x = minX; x < maxX; x += 1)
         {
-            for (int y = (int)MAP_RECT_MIN.Y; y < (int)MAP_RECT_MAX.Y; y += 1)
+            for (int y = minY; y < maxY; y += 1)
             {
                 ref var pixel = ref _pixels[x, y];
 
@@ -67,11 +71,16 @@ internal class ImageModifier
         var rect = new Rect(0, 0, _bitmap.PixelWidth, _bitmap.PixelHeight);
         var dv = new DrawingVisual();
 
+        int minX = (int)(MAP_RECT_MIN.X * _size.Width);
+        int maxX = (int)(MAP_RECT_MAX.X * _size.Width);
+        int minY = (int)(MAP_RECT_MIN.Y * _size.Height);
+        int maxY = (int)(MAP_RECT_MAX.Y * _size.Height);
+
         var scan = (PixelAction action, DrawingContext dc) =>
         {
-            for (int x = (int)MAP_RECT_MIN.X; x < (int)MAP_RECT_MAX.X; x += 1)
+            for (int x = minX; x < maxX; x += 1)
             {
-                for (int y = (int)MAP_RECT_MIN.Y; y < (int)MAP_RECT_MAX.Y; y += 1)
+                for (int y = minY; y < maxY; y += 1)
                 {
                     action(dc, ref _pixels[x, y]);
                 }
@@ -111,20 +120,21 @@ internal class ImageModifier
 
     static readonly System.Drawing.PointF[] ICE_AREA = new System.Drawing.PointF[]
     {
-            new System.Drawing.PointF(42, 62),
-            new System.Drawing.PointF(815, 62),
-            new System.Drawing.PointF(815, 550),
-            new System.Drawing.PointF(1088, 550),
-            new System.Drawing.PointF(1088, 1034),
-            new System.Drawing.PointF(42, 1034),
+            new System.Drawing.PointF(0.03f, 0.051113f),
+            new System.Drawing.PointF(0.582143f, 0.051113f),
+            new System.Drawing.PointF(0.582143f, 0.45342127f),
+            new System.Drawing.PointF(0.777143f, 0.45342127f),
+            new System.Drawing.PointF(0.777143f, 0.852432f),
+            new System.Drawing.PointF(0.03f, 0.852432f),
     };
 
     static readonly Point MAP_RECT_MIN = new(ICE_AREA[0].X, ICE_AREA[0].Y);
     static readonly Point MAP_RECT_MAX = new(ICE_AREA[^2].X, ICE_AREA[^2].Y);
 
-    const int SCALE_START_X = 44;       // pixels
-    const int SCALE_END_X = 1036;       // pixels
-    const int SCALE_Y = 1102;           // pixels
+    const double SCALE_START_X = 0.0316;    // rel pixels
+    const double SCALE_END_X = 0.74;        // rel pixels
+    const double SCALE_Y = 0.9085;          // rel pixels
+
     const double SCALE_SIZE = 5;                    // meters
     const float MAP_RESOLUTION_PER_PIXEL = 12.5f;   // km
 
@@ -211,32 +221,37 @@ internal class ImageModifier
         return pixels;
     }
 
-    private static Pixel[] CreateScale(Pixel[,] pixels)
+    private static Pixel[] CreateScale(Pixel[,] pixels, Size size)
     {
-        var scale = new Pixel[SCALE_END_X - SCALE_START_X];
-        for (int x = SCALE_START_X; x < SCALE_END_X; x += 1)
+        int scaleEndX = (int)(SCALE_END_X * size.Width);
+        int scaleStartX = (int)(SCALE_START_X * size.Width);
+        int scaleY = (int)(SCALE_Y * size.Height);
+
+        var scale = new Pixel[scaleEndX - scaleStartX];
+
+        for (int x = scaleStartX; x < scaleEndX; x += 1)
         {
-            scale[x - SCALE_START_X] = pixels[x, SCALE_Y];
+            scale[x - scaleStartX] = pixels[x, scaleY];
         }
 
         return scale;
     }
 
-    private static void AnnotatePixels(Pixel[,] pixels, Size _size, Pixel[] scale)
+    private static void AnnotatePixels(Pixel[,] pixels, Size size, Pixel[] scale)
     {
-        for (int x = 0; x < _size.Width; x += 1)
+        for (int x = 0; x < size.Width; x += 1)
         {
-            for (int y = 0; y < _size.Height; y += 1)
+            for (int y = 0; y < size.Height; y += 1)
             {
                 ref var pixel = ref pixels[x, y];
 
-                if (Pixel.IsInPolygon(ICE_AREA, x, y))
+                if (Pixel.IsInPolygon(ICE_AREA, (float)(x / size.Width), (float)(y / size.Height)))
                 {
                     pixel.IsMap = true;
 
                     pixel.IsSea = pixel.Red > 200 && pixel.Green > 200 && pixel.Blue > 200;
 
-                    var (delta, scaleValue) = MapToScale(scale, ref pixel);
+                    var (delta, scaleValue) = MapToScale(scale, size, ref pixel);
 
                     if (delta < 10)
                     {
@@ -251,18 +266,21 @@ internal class ImageModifier
         }
     }
 
-    private static (int, double) MapToScale(Pixel[] scale, ref Pixel pixel)
+    private static (int, double) MapToScale(Pixel[] scale, Size size, ref Pixel pixel)
     {
         var minDelta = int.MaxValue;
+        int scaleEndX = (int)(SCALE_END_X * size.Width);
+        int scaleStartX = (int)(SCALE_START_X * size.Width);
         double scaleValue = 0;
-        for (int x = SCALE_START_X; x < SCALE_END_X; x += 1)
+
+        for (int x = scaleStartX; x < scaleEndX; x += 1)
         {
-            var scalePixel = scale[x - SCALE_START_X];
+            var scalePixel = scale[x - scaleStartX];
             var delta = Math.Abs(pixel.Red - scalePixel.Red) + Math.Abs(pixel.Green - scalePixel.Green) + Math.Abs(pixel.Blue - scalePixel.Blue);
             if (delta < minDelta)
             {
                 minDelta = delta;
-                scaleValue = (double)x / (SCALE_END_X - SCALE_START_X);
+                scaleValue = (double)x / (scaleEndX - scaleStartX);
             }
         }
 
