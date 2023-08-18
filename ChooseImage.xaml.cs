@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,6 +47,9 @@ public partial class ChooseImage : Window
 
     private void Images_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        DialogResult = true;
+        if (e.Source is TextBlock)
+        {
+            DialogResult = true;
+        }
     }
 }

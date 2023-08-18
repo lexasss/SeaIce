@@ -131,9 +131,9 @@ internal class ImageModifier
     static readonly Point MAP_RECT_MIN = new(ICE_AREA[0].X, ICE_AREA[0].Y);
     static readonly Point MAP_RECT_MAX = new(ICE_AREA[^2].X, ICE_AREA[^2].Y);
 
-    const double SCALE_START_X = 0.0316;    // rel pixels
+    const double SCALE_START_X = 0.0316;    // rel pixels  23-538,575/728,631    44,1102/1400,1213
     const double SCALE_END_X = 0.74;        // rel pixels
-    const double SCALE_Y = 0.9085;          // rel pixels
+    const double SCALE_Y = 0.911252;          // rel pixels
 
     const double SCALE_SIZE = 5;                    // meters
     const float MAP_RESOLUTION_PER_PIXEL = 12.5f;   // km
@@ -253,7 +253,7 @@ internal class ImageModifier
 
                     var (delta, scaleValue) = MapToScale(scale, size, ref pixel);
 
-                    if (delta < 10)
+                    if (delta < 50)
                     {
                         pixel.IceThickness = scaleValue;
                         pixel.ScaleDelta = delta;

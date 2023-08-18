@@ -26,7 +26,8 @@
         </Grid.RowDefinitions>
         <ListView x:Name="lsvImages" Grid.Row="0"
                   VirtualizingPanel.IsVirtualizing="False"
-                  MouseDoubleClick="Images_MouseDoubleClick"/>
+                  MouseDoubleClick="Images_MouseDoubleClick">
+        </ListView>
         <WrapPanel Grid.Row="1"
                    HorizontalAlignment="Center">
             <Button Content="OK" Click="OK_Click"/>
