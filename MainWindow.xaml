@@ -4,6 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SeaIce"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:ThemeManager.IsThemeAware="True"
         mc:Ignorable="d"
         Title="Ice Amount Calculator"
         Height="600"
@@ -11,13 +14,19 @@
         WindowState="Maximized"
         Icon="/images/icon.ico"
         Activated="Window_Activated">
-    
+
     <Window.Resources>
-        <Style TargetType="CheckBox">
-            <Setter Property="Margin" Value="4"/>
+        <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
         </Style>
-        <Style TargetType="TabItem">
-            <Setter Property="Padding" Value="16,8"/>
+        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="Margin" Value="8,0,0,0"/>
+        </Style>
+        <!--Style TargetType="ui:ToggleSwitch" BasedOn="{StaticResource {x:Type ui:ToggleSwitch}}">
+            <Setter Property="Width" Value="86"/>
+        </Style-->
+        <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
             <Setter Property="MinWidth" Value="128"/>
         </Style>
     </Window.Resources>
@@ -38,6 +47,7 @@
                 </Label>
                 <Button x:Name="btnLoadThicknessImage" Grid.Row="1"
                     Content="Open from a file..."
+                    HorizontalAlignment="Stretch"
                     Padding="12"
                     Click="LoadThicknessImage_Click"/>
                 <Grid Grid.Row="2">
@@ -47,27 +57,54 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" MinWidth="144">
-                        <WrapPanel>
+                        <WrapPanel Margin="4,8">
                             <Label Content="Ice amount:"/>
-                            <Label x:Name="lblIceAmount" Content="0"/>
+                            <Label x:Name="lblIceAmount"
+                                   Margin="8,0,0,0"
+                                   Content="0"/>
                         </WrapPanel>
                         <CheckBox x:Name="chkColorizeLand"
-                            Content="Colorize land"
-                            Checked="Colorize_Checked"
-                            Unchecked="Colorize_Checked"/>
+                                  Content="Colorize land"
+                                  Checked="Colorize_Toggled"
+                                  Unchecked="Colorize_Toggled"/>
                         <CheckBox x:Name="chkColorizeSea"
-                            Content="Colorize sea"
-                            Checked="Colorize_Checked"
-                            Unchecked="Colorize_Checked"/>
+                                  Content="Colorize sea"
+                                  Checked="Colorize_Toggled"
+                                  Unchecked="Colorize_Toggled"/>
                         <CheckBox x:Name="chkColorizeRivers"
-                            Content="Colorize rivers"
-                            Checked="Colorize_Checked"
-                            Unchecked="Colorize_Checked"/>
+                                  Content="Colorize rivers"
+                                  Checked="Colorize_Toggled"
+                                  Unchecked="Colorize_Toggled"/>
                         <CheckBox x:Name="chkColorizeIce"
-                            Content="Colorize ice"
-                            IsChecked="True"
-                            Checked="Colorize_Checked"
-                            Unchecked="Colorize_Checked"/>
+                                  Content="Colorize ice"
+                                  IsChecked="True"
+                                  Checked="Colorize_Toggled"
+                                  Unchecked="Colorize_Toggled"/>
+                        <!--Grid Margin="4,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Content="Colorize land"/>
+                            <ui:ToggleSwitch x:Name="tgsColorizeLand" Grid.Row="0" Grid.Column="1"
+                                             Toggled="Colorize_Toggled"/>
+                            <Label Grid.Row="1" Grid.Column="0" Content="Colorize sea"/>
+                            <ui:ToggleSwitch x:Name="tgsColorizeSea" Grid.Row="1" Grid.Column="1"
+                                             Toggled="Colorize_Toggled"/>
+                            <Label Grid.Row="2" Grid.Column="0" Content="Colorize rivers"/>
+                            <ui:ToggleSwitch x:Name="tgsColorizeRivers" Grid.Row="2" Grid.Column="1"
+                                             Toggled="Colorize_Toggled"/>
+                            <Label Grid.Row="3" Grid.Column="0" Content="Colorize ice"/>
+                            <ui:ToggleSwitch x:Name="tgsColorizeIce" Grid.Row="3" Grid.Column="1"
+                                             IsOn="True"
+                                             Toggled="Colorize_Toggled"/>
+                        </Grid-->
                         <StackPanel Margin="20,0,0,0">
                             <Label>Step</Label>
                             <Grid>
@@ -109,7 +146,7 @@
                 </Grid>
             </Grid>
         </TabItem>
-        
+
         <TabItem Header="Extension">
             <Grid>
                 <Grid.RowDefinitions>
@@ -119,12 +156,13 @@
                 </Grid.RowDefinitions>
 
                 <Label Grid.Row="0"
-                    Padding="8"
-                    HorizontalAlignment="Center">
+                    HorizontalAlignment="Center"
+                    Padding="8">
                     <Hyperlink Click="ExtensionHyperlink_Click">ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/daily/images/</Hyperlink>
                 </Label>
                 <Button x:Name="btnLoadExtensionImage" Grid.Row="1"
                     Content="Open from a file..."
+                    HorizontalAlignment="Stretch"
                     Padding="12"
                     Click="LoadExtensionImage_Click"/>
                 <Grid Grid.Row="2">

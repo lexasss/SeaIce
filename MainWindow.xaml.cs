@@ -59,12 +59,18 @@ public partial class MainWindow : Window
         if (chkColorizeRivers.IsChecked ?? false) operation |= ImageModifier.PixelOperation.ColorizeRivers;
         if (chkColorizeSea.IsChecked ?? false) operation |= ImageModifier.PixelOperation.ColorizeSea;
         if (chkColorizeIce.IsChecked ?? false) operation |= ImageModifier.PixelOperation.ColorizeIce;
+        /*if (tgsColorizeLand.IsOn) operation |= ImageModifier.PixelOperation.ColorizeLand;
+        if (tgsColorizeRivers.IsOn) operation |= ImageModifier.PixelOperation.ColorizeRivers;
+        if (tgsColorizeSea.IsOn) operation |= ImageModifier.PixelOperation.ColorizeSea;
+        if (tgsColorizeIce.IsOn) operation |= ImageModifier.PixelOperation.ColorizeIce;
+        */
 
         imgThickness.Source = _modifier?.RedrawImage(operation);
     }
 
     private void UpdateThicknessImageIce()
     {
+        //if (tgsColorizeIce.IsOn &&
         if (chkColorizeIce.IsChecked == true &&
             _isDraggingSlider == false &&
             _modifier != null &&
@@ -281,7 +287,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void Colorize_Checked(object sender, RoutedEventArgs e)
+    private void Colorize_Toggled(object sender, RoutedEventArgs e)
     {
         UpdateThicknessImage();
     }

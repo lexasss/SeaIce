@@ -4,11 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SeaIce"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        ui:WindowHelper.UseModernWindowStyle="True"
         mc:Ignorable="d"
         Title="Select date"
         Height="450" Width="500"
-        ShowInTaskbar="False"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="ToolWindow">
     <ListView x:Name="lsvList"
               HorizontalAlignment="Center"
               HorizontalContentAlignment="Center"
@@ -21,16 +23,9 @@
             </ItemsPanelTemplate>
         </ListView.ItemsPanel>
         <ListView.ItemContainerStyle>
-            <Style TargetType="ListViewItem">
-                <Setter Property="Background" Value="AliceBlue" />
-                <Setter Property="BorderBrush" Value="Gray" />
-                <Setter Property="BorderThickness" Value="1" />
+            <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
                 <Setter Property="Margin" Value="2" />
-                <Style.Triggers>
-                    <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Background" Value="Beige" />
-                    </Trigger>
-                </Style.Triggers>
+                <Setter Property="HorizontalAlignment" Value="Center" />
             </Style>
         </ListView.ItemContainerStyle>
     </ListView>
