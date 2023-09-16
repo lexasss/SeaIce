@@ -8,25 +8,86 @@
         ui:WindowHelper.UseModernWindowStyle="True"
         mc:Ignorable="d"
         Title="Select date"
-        Height="450" Width="500"
+        Height="450" Width="600"
+        MinHeight="450"
+        MinWidth="600"
         WindowStartupLocation="CenterScreen"
         WindowStyle="ToolWindow">
-    <ListView x:Name="lsvList"
-              HorizontalAlignment="Center"
-              HorizontalContentAlignment="Center"
-              BorderBrush="{x:Null}"
-              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-              MouseLeftButtonUp="lsvList_MouseLeftButtonUp">
-        <ListView.ItemsPanel>
-            <ItemsPanelTemplate>
-                <WrapPanel ItemHeight="50" ItemWidth="50"/>
-            </ItemsPanelTemplate>
-        </ListView.ItemsPanel>
-        <ListView.ItemContainerStyle>
-            <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
-                <Setter Property="Margin" Value="2" />
-                <Setter Property="HorizontalAlignment" Value="Center" />
-            </Style>
-        </ListView.ItemContainerStyle>
-    </ListView>
+    <Window.Resources>
+        <Style x:Key="CloseDialog" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="Margin" Value="8"/>
+        </Style>
+        <Style x:Key="Tool" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="MinWidth" Value="32"/>
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="Margin" Value="8"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0"
+               Content="{Binding StageName}"
+               VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Center"/>
+
+        <WrapPanel Grid.Row="0" Grid.Column="0">
+            <Button Style="{StaticResource Tool}"
+                    IsEnabled="{Binding CanReturn}"
+                    Content="🠔"
+                    Click="Back_Click"/>
+        </WrapPanel>
+
+        <Label Grid.Row="0" Grid.Column="1"
+               Content="Dates"
+               HorizontalContentAlignment="Center"
+               VerticalContentAlignment="Center"
+               Margin="0,4"/>
+
+        <ListView x:Name="lsvList" Grid.Row="1" Grid.Column="0"
+                  HorizontalAlignment="Center"
+                  HorizontalContentAlignment="Center"
+                  BorderBrush="{x:Null}"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  MouseLeftButtonUp="Calendar_MouseLeftButtonUp">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel ItemHeight="50" ItemWidth="50"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                    <Setter Property="Margin" Value="2" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+
+        <ListView x:Name="lsvDates" Grid.Row="1" Grid.Column="1"
+                  ItemsSource="{Binding Dates}"
+                  VirtualizingPanel.IsVirtualizing="False"
+                  KeyUp="Dates_KeyUp"/>
+
+        <WrapPanel Grid.Row="2" Grid.ColumnSpan="2"
+                   HorizontalAlignment="Center">
+            <Button Style="{StaticResource CloseDialog}"
+                    IsEnabled="{Binding HasDates}"
+                    Content="OK"
+                    Click="Ok_Click"/>
+            <Button Style="{StaticResource CloseDialog}"
+                    IsCancel="True"
+                    Content="Cancel"/>
+        </WrapPanel>
+    </Grid>
 </Window>

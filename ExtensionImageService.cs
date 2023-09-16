@@ -28,12 +28,12 @@ internal static class ExtensionImageService
         return $"{date[0..4]} {date[4..6]} {date[6..]}";
     }
 
-    public static int[]? SelectDate()
+    public static ChooseDate.Date[]? SelectDates()
     {
         var dialog = new ChooseDate();
         if (dialog.ShowDialog() == true )
         {
-            return dialog.Date;
+            return dialog.Dates;
         }
 
         return null;

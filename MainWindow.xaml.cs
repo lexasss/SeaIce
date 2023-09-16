@@ -350,20 +350,23 @@ public partial class MainWindow : Window
 
     private async void ExtensionHyperlink_Click(object sender, RoutedEventArgs e)
     {
-        int[]? date = ExtensionImageService.SelectDate();
-        if (date != null)
+        ChooseDate.Date[]? dates = ExtensionImageService.SelectDates();
+        if (dates != null)
         {
             Disable(lblExtensionWait);
 
-            var filename = await ExtensionImageService.DownloadImage(date[0], date[1], date[2]);
-            if (!string.IsNullOrEmpty(filename))
+            foreach (var date in dates)
             {
-                var fullfilename = Path.GetFullPath(filename);
-                LoadExtensionImage(fullfilename, true);
-            }
-            else
-            {
-                MessageBox.Show("Image does not exist on this date", Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                var filename = await ExtensionImageService.DownloadImage(date.Year, date.Month, date.Day);
+                if (!string.IsNullOrEmpty(filename))
+                {
+                    var fullfilename = Path.GetFullPath(filename);
+                    LoadExtensionImage(fullfilename, true);
+                }
+                else
+                {
+                    MessageBox.Show($"Image does not exist on date {date}", Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
 
             Enable(lblExtensionWait);

@@ -1,30 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace SeaIce;
 
-public partial class ChooseDate : Window
+public partial class ChooseDate : Window, INotifyPropertyChanged
 {
-    public int[]? Date { get; private set; } = null;
+    public class Date
+    {
+        public int Year { get; init; }
+        public int Month { get; init; }
+        public int Day { get; init; }
+        public Date(int year, int month, int day)
+        {
+            Year = year;
+            Month = month;
+            Day = day;
+        }
+        public override string ToString() => $"{Year} {Month:D2} {Day:D2}";
+    }
+
+    public Date[] Dates => _dates.ToArray();
+
+    public bool HasDates => _dates.Count > 0;
+    public bool CanReturn => _stage == Stage.Month || _stage == Stage.Day;
+    public string StageName => _stage.ToString();
+
+    public readonly ObservableCollection<ListViewItem> CalendarItems = new();
 
     public ChooseDate()
     {
         InitializeComponent();
+        DataContext = this;
 
-        var years = new List<int>();
-        var todayYear = DateTime.Now.Year;
-        for (var year = FIRST_YEAR; year <= todayYear; year += 1)
+        lsvList.ItemsSource = CalendarItems;
+
+        for (var year = FIRST_YEAR; year <= _todayYear; year += 1)
         {
-            years.Add(year);
+            _years.Add(year);
         }
 
-        lsvList.ItemsSource = years.Select(year => new ListViewItem()
-        {
-            Content = year.ToString(),
-        });
+        SetStage(Stage.Year);
     }
 
     // Internal
@@ -40,13 +60,76 @@ public partial class ChooseDate : Window
         Day,
     }
 
-    Stage _stage = Stage.Year;
+    readonly int _todayYear = DateTime.Now.Year;
+    readonly int _todayMonth = DateTime.Now.Month;
+    readonly int _todayDay = DateTime.Now.Day;
+
+    List<int> _years = new();
+
+    Stage _stage;
     int _year = 0;
     int _month = 0;
     int _day = 0;
+    List<Date> _dates = new();
 
-    private void lsvList_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void SetStage(Stage stage)
     {
+        _stage = stage;
+
+        CalendarItems.Clear();
+
+        var firstMonth = _year == FIRST_YEAR ? FIRST_MONTH - 1 : 0;
+        var lastMonth = _year == _todayYear ? _todayMonth : 12;
+
+        var list = _stage switch
+        {
+            Stage.Year => _years.Select(year => new ListViewItem() { Content = year.ToString() }),
+            Stage.Month => ExtensionImageService.Monthes[firstMonth..lastMonth].Select(month => new ListViewItem() { Content = month }),
+            Stage.Day => GetDays().Select(day => new ListViewItem() { Content = day.ToString() }),
+            _ => throw new Exception("Invalid stage")
+        };
+
+        foreach (var lvi in list)
+        {
+            CalendarItems.Add(lvi);
+        }
+
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StageName)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CanReturn)));
+    }
+
+    private IEnumerable<int> GetDays()
+    {
+        var firstDay = _year == FIRST_YEAR && _month == FIRST_MONTH ? FIRST_DAY : 1;
+        var lastDay = ExtensionImageService.Days[_month - 1];
+        if (_year == _todayYear && _month == _todayMonth)
+        {
+            lastDay = _todayDay;
+        }
+        else
+        {
+            if (_month == 1 && (_year % 4) == 0)
+                lastDay += 1;
+        }
+        var days = new List<int>();
+        for (var day = firstDay; day <= lastDay; day += 1)
+        {
+            days.Add(day);
+        }
+
+        return days;
+    }
+
+    // UI
+
+    private void Calendar_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource.GetType() != typeof(TextBlock) && e.OriginalSource.GetType() != typeof(Border))
+        {
+            return;
+        }
         if (lsvList.SelectedItem == null)
         {
             return;
@@ -54,56 +137,55 @@ public partial class ChooseDate : Window
 
         string selectedValue = (string)((ListViewItem)lsvList.SelectedItem).Content;
 
-        var todayYear = DateTime.Now.Year;
-        var todayMonth = DateTime.Now.Month;
-        var todayDay = DateTime.Now.Day;
-
         if (_stage == Stage.Year)
         {
             _year = int.Parse(selectedValue);
-            var firstMonth = _year == FIRST_YEAR ? FIRST_MONTH - 1 : 0;
-            var lastMonth = _year == todayYear ? todayMonth : 12;
-            lsvList.ItemsSource = ExtensionImageService.Monthes[firstMonth..lastMonth].Select(month => new ListViewItem()
-            {
-                Content = month,
-            });
-
-            _stage = Stage.Month;
+            SetStage(Stage.Month);
         }
         else if (_stage == Stage.Month)
         {
             _month = ExtensionImageService.Monthes.TakeWhile(month => month != selectedValue).Count() + 1;
-            var firstDay = _year == FIRST_YEAR && _month == FIRST_MONTH ? FIRST_DAY : 1;
-            var lastDay = ExtensionImageService.Days[_month - 1];
-            if (_year == todayYear && _month == todayMonth)
-            {
-                lastDay = todayDay;
-            }
-            else
-            {
-                if (_month == 1 && (_year % 4) == 0)
-                    lastDay += 1;
-            }
-
-            var days = new List<int>();
-            for (var day = firstDay; day <= lastDay; day += 1)
-            {
-                days.Add(day);
-            }
-
-            lsvList.ItemsSource = days.Select(day => new ListViewItem()
-            {
-                Content = day.ToString(),
-            });
-
-            _stage = Stage.Day;
+            SetStage(Stage.Day);
         }
         else if (_stage == Stage.Day)
         {
             _day = int.Parse(selectedValue);
+            if (_dates.Any(date => date.Year == _year && date.Month == _month && date.Day == _day))
+            {
+                MessageBox.Show("This date was selected already", Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                _dates.Add(new Date(_year, _month, _day));
+            }
 
-            Date = new int[] { _year, _month, _day };
-            DialogResult = true;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Dates)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasDates)));
+
+            SetStage(Stage.Year);
         }
+    }
+
+    private void Dates_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Delete)
+        {
+            _dates.Remove((Date)lsvDates.SelectedItem);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Dates)));
+        }
+    }
+
+    private void Ok_Click(object sender, RoutedEventArgs e)
+    {
+        DialogResult = true;
+    }
+
+    private void Back_Click(object sender, RoutedEventArgs e)
+    {
+        SetStage(_stage switch {
+            Stage.Day => Stage.Month,
+            Stage.Month => Stage.Year,
+            _ => Stage.Day
+        });
     }
 }
