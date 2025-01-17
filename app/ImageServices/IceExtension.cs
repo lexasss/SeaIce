@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SeaIce.ImageServices;
 
-internal static class Extension
+internal static class IceExtension
 {
     public static string ServerName = "sidads.colorado.edu";
     public static string DataPath => "/DATASETS/NOAA/G02135/north/daily/images/";
@@ -14,7 +14,7 @@ internal static class Extension
     public static string[] Monthes => new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
     public static int[] Days => new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-    static Extension()
+    static IceExtension()
     {
         if (!Directory.Exists(ImageLocalFolder))
         {
@@ -30,27 +30,25 @@ internal static class Extension
 
     public static async Task<string?> DownloadImage(int year, int month, int day)
     {
-        var (remoteFolder, filename) = CreateImagePath(year, month, day);
-        string localFilePath = Path.Combine(ImageLocalFolder, filename);
+        var (remoteFolder, remoteFilename) = GetImagePath(year, month, day);
+        string localFilePath = Path.Combine(ImageLocalFolder, remoteFilename);
 
         bool isDownloaded = false;
         var token = new CancellationToken();
 
-        using (var ftp = new AsyncFtpClient(ServerName))
+        using var ftp = new AsyncFtpClient(ServerName);
+        await ftp.Connect(token);
+        try
         {
-            await ftp.Connect(token);
-            try
-            {
-                isDownloaded = await ftp.DownloadFile(localFilePath, DataPath + remoteFolder + filename, FtpLocalExists.Overwrite, token: token) == FtpStatus.Success;
-            }
-            catch (Exception) { }
+            isDownloaded = await ftp.DownloadFile(localFilePath, DataPath + remoteFolder + remoteFilename, FtpLocalExists.Overwrite, token: token) == FtpStatus.Success;
         }
+        catch (Exception) { }
 
         return isDownloaded ? localFilePath : null;
     }
 
     // Internal
 
-    private static (string, string) CreateImagePath(int year, int month, int day) =>
+    private static (string, string) GetImagePath(int year, int month, int day) =>
         ($"{year}/{month:D2}_{Monthes[month - 1]}/", $"N_{year}{month:D2}{day:D2}_conc_hires_v3.0.png");
 }

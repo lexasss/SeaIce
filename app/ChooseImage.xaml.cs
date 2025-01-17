@@ -18,7 +18,7 @@ public partial class ChooseImage : Window
     {
         lsvImages.ItemsSource = links.Select(link => new ListViewItem()
         {
-            Content = Thinkness.CreateName(link),
+            Content = IceThinkness.GetFriendlyImageName(link),
             Tag = link
         });
     }

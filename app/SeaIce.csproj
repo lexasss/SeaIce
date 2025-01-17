@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ImageServices\Common.cs~RF76880f1.TMP" />
     <None Remove="images\icon.ico" />
   </ItemGroup>
 

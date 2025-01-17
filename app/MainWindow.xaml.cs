@@ -26,7 +26,7 @@ public partial class MainWindow : Window
     private void LoadExistingThicknessImages()
     {
         var imageFilenames = Directory.EnumerateFiles(
-            Path.Combine(Directory.GetCurrentDirectory(), Thinkness.ImageLocalFolder),
+            Path.Combine(Directory.GetCurrentDirectory(), IceThinkness.ImageLocalFolder),
             $"*.png");
         foreach (var imageFilename in imageFilenames)
         {
@@ -37,7 +37,7 @@ public partial class MainWindow : Window
     private void LoadExistingExtensionImages()
     {
         var imageFilenames = Directory.EnumerateFiles(
-            Path.Combine(Directory.GetCurrentDirectory(), Extension.ImageLocalFolder),
+            Path.Combine(Directory.GetCurrentDirectory(), IceExtension.ImageLocalFolder),
             $"*.png");
         foreach (var imageFilename in imageFilenames)
         {
@@ -148,7 +148,7 @@ public partial class MainWindow : Window
     {
         bool result = false;
 
-        var imageName = Thinkness.CreateName(filename);
+        var imageName = IceThinkness.GetFriendlyImageName(filename);
         var imageItem = ImageExists(lsvThicknessImages, imageName);
         if (imageItem != null)
         {
@@ -198,7 +198,7 @@ public partial class MainWindow : Window
     {
         bool result = false;
 
-        var imageName = Extension.CreateName(filename);
+        var imageName = IceExtension.CreateName(filename);
         var imageItem = ImageExists(lsvExtensionImages, imageName);
         if (imageItem != null)
         {
@@ -250,7 +250,7 @@ public partial class MainWindow : Window
 
         foreach (var date in dates)
         {
-            var filename = await Thinkness.DownloadImage(date.Year, date.Month, date.Day);
+            var filename = await IceThinkness.DownloadImage(date.Year, date.Month, date.Day);
             if (!string.IsNullOrEmpty(filename))
             {
                 var fullfilename = Path.GetFullPath(filename);
@@ -383,7 +383,7 @@ public partial class MainWindow : Window
 
         foreach (var date in dates)
         {
-            var filename = await Extension.DownloadImage(date.Year, date.Month, date.Day);
+            var filename = await IceExtension.DownloadImage(date.Year, date.Month, date.Day);
             if (!string.IsNullOrEmpty(filename))
             {
                 var fullfilename = Path.GetFullPath(filename);

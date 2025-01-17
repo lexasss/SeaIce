@@ -1,17 +1,15 @@
 ﻿using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SeaIce.ImageServices;
 
-internal static class Thinkness
+internal static class IceThinkness
 {
     public static string ImageSource => "https://ocean.dmi.dk/arctic/icethickness/anim/plots_uk/";
     public static string ImageLocalFolder => "thickness";
 
-    static Thinkness()
+    static IceThinkness()
     {
         if (!Directory.Exists(ImageLocalFolder))
         {
@@ -19,13 +17,13 @@ internal static class Thinkness
         }
     }
 
-    public static string CreateName(string filename)
+    public static string GetFriendlyImageName(string filename)
     {
         var date = filename.Split('\\')[^1].Split("_")[^1].Split(".")[0];
         return $"{date[0..4]} {date[4..6]} {date[6..]}";
     }
 
-    public static async Task<string[]?> GetLinks()
+    /*public static async Task<string[]?> GetLinks()
     {
         string[]? result = null;
 
@@ -34,7 +32,7 @@ internal static class Thinkness
         if (response?.StatusCode == System.Net.HttpStatusCode.OK)
         {
             var content = await response.Content.ReadAsStringAsync();
-            var re = new Regex($"\"{ImageBasename}(\\d+).png");
+            var re = new System.Text.RegularExpressions.Regex($"\"{ImageBasename}(\\d+).png");
             var matches = re.Matches(content);
             result = matches.Select(match => match.ToString()[1..]).ToArray();
         }
@@ -57,27 +55,30 @@ internal static class Thinkness
         }
 
         return filename;
-    }
+    }*/
 
     public static async Task<string?> DownloadImage(int year, int month, int day)
     {
-        string? filename = null;
+        string? localFilePath = null;
+
+        var remoteFilename = GetImageImage(year, month, day);
 
         using var client = new HttpClient();
-        var imageName = $"{ImageBasename}{year}{month:D2}{day:D2}.png";
-        var response = await client.GetAsync(ImageSource + imageName);
+        var response = await client.GetAsync(ImageSource + remoteFilename);
         if (response?.StatusCode == System.Net.HttpStatusCode.OK)
         {
-            filename = Path.Combine(ImageLocalFolder, imageName);
+            localFilePath = Path.Combine(ImageLocalFolder, remoteFilename);
             var content = await response.Content.ReadAsByteArrayAsync();
-            using var writer = new StreamWriter(filename);
+            using var writer = new StreamWriter(localFilePath);
             await writer.BaseStream.WriteAsync(content);
         }
 
-        return filename;
+        return localFilePath;
     }
 
     // Internal
 
     private static string ImageBasename => "CICE_combine_thick_SM_EN_"; // "FullSize_CICE_combine_thick_SM_EN_";
+
+    private static string GetImageImage(int year, int month, int day) => $"{ImageBasename}{year}{month:D2}{day:D2}.png";
 }

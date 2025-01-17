@@ -85,7 +85,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
         var list = _stage switch
         {
             Stage.Year => _years.Select(year => new ListViewItem() { Content = year.ToString() }),
-            Stage.Month => Extension.Monthes[firstMonth..lastMonth].Select(month => new ListViewItem() { Content = month }),
+            Stage.Month => IceExtension.Monthes[firstMonth..lastMonth].Select(month => new ListViewItem() { Content = month }),
             Stage.Day => GetDays().Select(day => new ListViewItem() { Content = day.ToString() }),
             _ => throw new Exception("Invalid stage")
         };
@@ -102,7 +102,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
     private IEnumerable<int> GetDays()
     {
         var firstDay = _year == _startDate.Year && _month == _startDate.Month ? _startDate.Day : 1;
-        var lastDay = Extension.Days[_month - 1];
+        var lastDay = IceExtension.Days[_month - 1];
         if (_year == _endDate.Year && _month == _endDate.Month)
         {
             lastDay = _endDate.Day;
@@ -143,7 +143,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
         }
         else if (_stage == Stage.Month)
         {
-            _month = Extension.Monthes.TakeWhile(month => month != selectedValue).Count() + 1;
+            _month = IceExtension.Monthes.TakeWhile(month => month != selectedValue).Count() + 1;
             SetStage(Stage.Day);
         }
         else if (_stage == Stage.Day)

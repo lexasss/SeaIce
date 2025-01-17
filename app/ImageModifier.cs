@@ -31,7 +31,7 @@ internal class ImageModifier
         _pixels = ReadPixels(_bitmap);
         _scale = CreateScale(_pixels, _size);
 
-        Name = Thinkness.CreateName(filename);
+        Name = IceThinkness.GetFriendlyImageName(filename);
 
         AnnotatePixels(_pixels, _size, _scale);
     }
