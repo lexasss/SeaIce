@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using SeaIce.ImageServices;
 
 namespace SeaIce;
 
@@ -86,7 +87,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
         var list = _stage switch
         {
             Stage.Year => _years.Select(year => new ListViewItem() { Content = year.ToString() }),
-            Stage.Month => ExtensionImageService.Monthes[firstMonth..lastMonth].Select(month => new ListViewItem() { Content = month }),
+            Stage.Month => Extension.Monthes[firstMonth..lastMonth].Select(month => new ListViewItem() { Content = month }),
             Stage.Day => GetDays().Select(day => new ListViewItem() { Content = day.ToString() }),
             _ => throw new Exception("Invalid stage")
         };
@@ -103,7 +104,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
     private IEnumerable<int> GetDays()
     {
         var firstDay = _year == FIRST_YEAR && _month == FIRST_MONTH ? FIRST_DAY : 1;
-        var lastDay = ExtensionImageService.Days[_month - 1];
+        var lastDay = Extension.Days[_month - 1];
         if (_year == _todayYear && _month == _todayMonth)
         {
             lastDay = _todayDay;
@@ -144,7 +145,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
         }
         else if (_stage == Stage.Month)
         {
-            _month = ExtensionImageService.Monthes.TakeWhile(month => month != selectedValue).Count() + 1;
+            _month = Extension.Monthes.TakeWhile(month => month != selectedValue).Count() + 1;
             SetStage(Stage.Day);
         }
         else if (_stage == Stage.Day)

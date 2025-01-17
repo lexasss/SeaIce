@@ -4,9 +4,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SeaIce;
+namespace SeaIce.ImageServices;
 
-internal static class ExtensionImageService
+internal static class Extension
 {
     public static string ServerName = "sidads.colorado.edu";
     public static string DataPath => "/DATASETS/NOAA/G02135/north/daily/images/";
@@ -14,7 +14,7 @@ internal static class ExtensionImageService
     public static string[] Monthes => new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
     public static int[] Days => new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-    static ExtensionImageService()
+    static Extension()
     {
         if (!Directory.Exists(ImageLocalFolder))
         {
@@ -26,17 +26,6 @@ internal static class ExtensionImageService
     {
         var date = filename.Split('\\')[^1].Split("_")[1];
         return $"{date[0..4]} {date[4..6]} {date[6..]}";
-    }
-
-    public static ChooseDate.Date[]? SelectDates()
-    {
-        var dialog = new ChooseDate();
-        if (dialog.ShowDialog() == true )
-        {
-            return dialog.Dates;
-        }
-
-        return null;
     }
 
     public static async Task<string?> DownloadImage(int year, int month, int day)

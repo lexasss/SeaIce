@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using SeaIce.ImageServices;
 
 namespace SeaIce;
 
@@ -30,7 +31,7 @@ internal class ImageModifier
         _pixels = ReadPixels(_bitmap);
         _scale = CreateScale(_pixels, _size);
 
-        Name = ThinknessImageService.CreateName(filename);
+        Name = Thinkness.CreateName(filename);
 
         AnnotatePixels(_pixels, _size, _scale);
     }

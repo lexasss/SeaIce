@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SeaIce.ImageServices;
 
 namespace SeaIce;
 
@@ -18,7 +18,7 @@ public partial class ChooseImage : Window
     {
         lsvImages.ItemsSource = links.Select(link => new ListViewItem()
         {
-            Content = ThinknessImageService.CreateName(link),
+            Content = Thinkness.CreateName(link),
             Tag = link
         });
     }

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using SeaIce.ImageServices;
 
 namespace SeaIce;
 
@@ -25,7 +26,7 @@ public partial class MainWindow : Window
     private void LoadExistingThicknessImages()
     {
         var imageFilenames = Directory.EnumerateFiles(
-            Path.Combine(Directory.GetCurrentDirectory(), ThinknessImageService.ImageLocalFolder),
+            Path.Combine(Directory.GetCurrentDirectory(), Thinkness.ImageLocalFolder),
             $"*.png");
         foreach (var imageFilename in imageFilenames)
         {
@@ -36,7 +37,7 @@ public partial class MainWindow : Window
     private void LoadExistingExtensionImages()
     {
         var imageFilenames = Directory.EnumerateFiles(
-            Path.Combine(Directory.GetCurrentDirectory(), ExtensionImageService.ImageLocalFolder),
+            Path.Combine(Directory.GetCurrentDirectory(), Extension.ImageLocalFolder),
             $"*.png");
         foreach (var imageFilename in imageFilenames)
         {
@@ -147,7 +148,7 @@ public partial class MainWindow : Window
     {
         bool result = false;
 
-        var imageName = ThinknessImageService.CreateName(filename);
+        var imageName = Thinkness.CreateName(filename);
         var imageItem = ImageExists(lsvThicknessImages, imageName);
         if (imageItem != null)
         {
@@ -197,7 +198,7 @@ public partial class MainWindow : Window
     {
         bool result = false;
 
-        var imageName = ExtensionImageService.CreateName(filename);
+        var imageName = Extension.CreateName(filename);
         var imageItem = ImageExists(lsvExtensionImages, imageName);
         if (imageItem != null)
         {
@@ -240,6 +241,29 @@ public partial class MainWindow : Window
     {
         SelectThicknessImage(null);
 
+        //*
+        ChooseDate.Date[]? dates = Common.SelectDates();
+        if (dates == null)
+            return;
+
+        Disable(lblThicknessWait);
+
+        foreach (var date in dates)
+        {
+            var filename = await Thinkness.DownloadImage(date.Year, date.Month, date.Day);
+            if (!string.IsNullOrEmpty(filename))
+            {
+                var fullfilename = Path.GetFullPath(filename);
+                LoadThicknessImage(fullfilename, true);
+            }
+            else
+            {
+                MessageBox.Show($"Image does not exist on date {date}", Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /*
+
         Disable(lblThicknessWait);
 
         var links = await ThinknessImageService.GetLinks();
@@ -268,6 +292,7 @@ public partial class MainWindow : Window
                 LoadThicknessImage(fullfilename, true);
             }
         }
+        //*/
 
         Enable(lblThicknessWait);
     }
@@ -350,27 +375,27 @@ public partial class MainWindow : Window
 
     private async void ExtensionHyperlink_Click(object sender, RoutedEventArgs e)
     {
-        ChooseDate.Date[]? dates = ExtensionImageService.SelectDates();
-        if (dates != null)
+        ChooseDate.Date[]? dates = Common.SelectDates();
+        if (dates == null)
+            return;
+
+        Disable(lblExtensionWait);
+
+        foreach (var date in dates)
         {
-            Disable(lblExtensionWait);
-
-            foreach (var date in dates)
+            var filename = await Extension.DownloadImage(date.Year, date.Month, date.Day);
+            if (!string.IsNullOrEmpty(filename))
             {
-                var filename = await ExtensionImageService.DownloadImage(date.Year, date.Month, date.Day);
-                if (!string.IsNullOrEmpty(filename))
-                {
-                    var fullfilename = Path.GetFullPath(filename);
-                    LoadExtensionImage(fullfilename, true);
-                }
-                else
-                {
-                    MessageBox.Show($"Image does not exist on date {date}", Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                var fullfilename = Path.GetFullPath(filename);
+                LoadExtensionImage(fullfilename, true);
             }
-
-            Enable(lblExtensionWait);
+            else
+            {
+                MessageBox.Show($"Image does not exist on date {date}", Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+        Enable(lblExtensionWait);
     }
 
     private void LoadExtensionImage_Click(object sender, RoutedEventArgs e)

@@ -4,14 +4,14 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace SeaIce;
+namespace SeaIce.ImageServices;
 
-internal static class ThinknessImageService
+internal static class Thinkness
 {
     public static string ImageSource => "https://ocean.dmi.dk/arctic/icethickness/anim/plots_uk/";
     public static string ImageLocalFolder => "thickness";
 
-    static ThinknessImageService()
+    static Thinkness()
     {
         if (!Directory.Exists(ImageLocalFolder))
         {
@@ -46,11 +46,29 @@ internal static class ThinknessImageService
     {
         string? filename = null;
 
-        var client = new HttpClient();
+        using var client = new HttpClient();
         var response = await client.GetAsync(ImageSource + imageName);
         if (response?.StatusCode == System.Net.HttpStatusCode.OK)
         {
             filename = Path.Combine(ImageLocalFolder, imageName.Split("/")[^1]);
+            var content = await response.Content.ReadAsByteArrayAsync();
+            using var writer = new StreamWriter(filename);
+            await writer.BaseStream.WriteAsync(content);
+        }
+
+        return filename;
+    }
+
+    public static async Task<string?> DownloadImage(int year, int month, int day)
+    {
+        string? filename = null;
+
+        using var client = new HttpClient();
+        var imageName = $"{ImageBasename}{year}{month:D2}{day:D2}.png";
+        var response = await client.GetAsync(ImageSource + imageName);
+        if (response?.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            filename = Path.Combine(ImageLocalFolder, imageName);
             var content = await response.Content.ReadAsByteArrayAsync();
             using var writer = new StreamWriter(filename);
             await writer.BaseStream.WriteAsync(content);
