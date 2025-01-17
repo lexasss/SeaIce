@@ -33,14 +33,17 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
 
     public readonly ObservableCollection<ListViewItem> CalendarItems = new();
 
-    public ChooseDate()
+    public ChooseDate(DateTime startDate, DateTime endDate)
     {
         InitializeComponent();
         DataContext = this;
 
         lsvList.ItemsSource = CalendarItems;
 
-        for (var year = FIRST_YEAR; year <= _todayYear; year += 1)
+        _startDate = startDate;
+        _endDate = endDate;
+
+        for (var year = startDate.Year; year <= endDate.Year; year += 1)
         {
             _years.Add(year);
         }
@@ -50,10 +53,6 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
 
     // Internal
 
-    const int FIRST_YEAR = 1978;
-    const int FIRST_MONTH = 10;
-    const int FIRST_DAY = 26;
-
     enum Stage
     {
         Year,
@@ -61,9 +60,8 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
         Day,
     }
 
-    readonly int _todayYear = DateTime.Now.Year;
-    readonly int _todayMonth = DateTime.Now.Month;
-    readonly int _todayDay = DateTime.Now.Day;
+    readonly DateTime _startDate;
+    readonly DateTime _endDate;
 
     List<int> _years = new();
 
@@ -81,8 +79,8 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
 
         CalendarItems.Clear();
 
-        var firstMonth = _year == FIRST_YEAR ? FIRST_MONTH - 1 : 0;
-        var lastMonth = _year == _todayYear ? _todayMonth : 12;
+        var firstMonth = _year == _startDate.Year ? _startDate.Month - 1 : 0;
+        var lastMonth = _year == _endDate.Year ? _endDate.Month : 12;
 
         var list = _stage switch
         {
@@ -103,11 +101,11 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
 
     private IEnumerable<int> GetDays()
     {
-        var firstDay = _year == FIRST_YEAR && _month == FIRST_MONTH ? FIRST_DAY : 1;
+        var firstDay = _year == _startDate.Year && _month == _startDate.Month ? _startDate.Day : 1;
         var lastDay = Extension.Days[_month - 1];
-        if (_year == _todayYear && _month == _todayMonth)
+        if (_year == _endDate.Year && _month == _endDate.Month)
         {
-            lastDay = _todayDay;
+            lastDay = _endDate.Day;
         }
         else
         {

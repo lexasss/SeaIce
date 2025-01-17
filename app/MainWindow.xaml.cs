@@ -242,7 +242,7 @@ public partial class MainWindow : Window
         SelectThicknessImage(null);
 
         //*
-        ChooseDate.Date[]? dates = Common.SelectDates();
+        ChooseDate.Date[]? dates = Common.SelectDates(new DateTime(2000, 1, 1));
         if (dates == null)
             return;
 
@@ -375,7 +375,7 @@ public partial class MainWindow : Window
 
     private async void ExtensionHyperlink_Click(object sender, RoutedEventArgs e)
     {
-        ChooseDate.Date[]? dates = Common.SelectDates();
+        ChooseDate.Date[]? dates = Common.SelectDates(new DateTime(1978, 10, 26));
         if (dates == null)
             return;
 
