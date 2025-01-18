@@ -5,11 +5,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using SeaIce.ImageServices;
 
 namespace SeaIce;
 
-public partial class ChooseDate : Window, INotifyPropertyChanged
+public partial class Calendar : Window, INotifyPropertyChanged
 {
     public class Date
     {
@@ -25,6 +24,9 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
         public override string ToString() => $"{Year} {Month:D2} {Day:D2}";
     }
 
+    public static string[] Monthes => new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    public static int[] Days => new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
     public Date[] Dates => _dates.ToArray();
 
     public bool HasDates => _dates.Count > 0;
@@ -33,7 +35,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
 
     public readonly ObservableCollection<ListViewItem> CalendarItems = new();
 
-    public ChooseDate(DateTime startDate, DateTime endDate)
+    public Calendar(DateTime startDate, DateTime endDate)
     {
         InitializeComponent();
         DataContext = this;
@@ -85,7 +87,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
         var list = _stage switch
         {
             Stage.Year => _years.Select(year => new ListViewItem() { Content = year.ToString() }),
-            Stage.Month => IceExtension.Monthes[firstMonth..lastMonth].Select(month => new ListViewItem() { Content = month }),
+            Stage.Month => Monthes[firstMonth..lastMonth].Select(month => new ListViewItem() { Content = month }),
             Stage.Day => GetDays().Select(day => new ListViewItem() { Content = day.ToString() }),
             _ => throw new Exception("Invalid stage")
         };
@@ -102,7 +104,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
     private IEnumerable<int> GetDays()
     {
         var firstDay = _year == _startDate.Year && _month == _startDate.Month ? _startDate.Day : 1;
-        var lastDay = IceExtension.Days[_month - 1];
+        var lastDay = Days[_month - 1];
         if (_year == _endDate.Year && _month == _endDate.Month)
         {
             lastDay = _endDate.Day;
@@ -143,7 +145,7 @@ public partial class ChooseDate : Window, INotifyPropertyChanged
         }
         else if (_stage == Stage.Month)
         {
-            _month = IceExtension.Monthes.TakeWhile(month => month != selectedValue).Count() + 1;
+            _month = Monthes.TakeWhile(month => month != selectedValue).Count() + 1;
             SetStage(Stage.Day);
         }
         else if (_stage == Stage.Day)

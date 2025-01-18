@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="ImageServices\Common.cs~RF76880f1.TMP" />
+    <None Remove="ImageServices\Common.cs~RF9348ede.TMP" />
     <None Remove="images\icon.ico" />
   </ItemGroup>
 

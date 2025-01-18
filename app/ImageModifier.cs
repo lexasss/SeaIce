@@ -37,7 +37,7 @@ internal class ImageModifier
     }
 
     /// <summary>
-    /// Calculates amount of ice in cumic kilometers
+    /// Calculates amount of ice in cubic kilometers
     /// </summary>
     /// <returns></returns>
     public double GetIceAmount()
@@ -134,7 +134,7 @@ internal class ImageModifier
 
     const double SCALE_START_X = 0.0316;    // rel pixels  23-538,575/728,631    44,1102/1400,1213
     const double SCALE_END_X = 0.74;        // rel pixels
-    const double SCALE_Y = 0.911252;          // rel pixels
+    const double SCALE_Y = 0.911252;        // rel pixels
 
     const double SCALE_SIZE = 5;                    // meters
     const float MAP_RESOLUTION_PER_PIXEL = 12.5f;   // km

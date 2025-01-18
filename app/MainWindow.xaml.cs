@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,10 +17,12 @@ public partial class MainWindow : Window
         LoadExistingExtensionImages();
     }
 
+    // Internal
+
     ImageModifier? _modifier = null;
     BitmapImage? _extImage = null;
     bool _isDraggingSlider = false;
-    ChooseImage? _modalDialog = null;
+    Calendar? _calendarDialog = null;
 
     private void LoadExistingThicknessImages()
     {
@@ -144,6 +145,20 @@ public partial class MainWindow : Window
         return null;
     }
 
+    public Calendar.Date[]? SelectDates(DateTime startDate, DateTime? endDate = null)
+    {
+        Calendar.Date[]? result = null;
+
+        _calendarDialog = new Calendar(startDate, endDate ?? DateTime.Now.AddDays(-1));
+        if (_calendarDialog.ShowDialog() == true)
+        {
+            result = _calendarDialog.Dates;
+        }
+
+        _calendarDialog = null;
+        return result;
+    }
+
     private bool LoadThicknessImage(string filename, bool prepare)
     {
         bool result = false;
@@ -242,7 +257,7 @@ public partial class MainWindow : Window
         SelectThicknessImage(null);
 
         //*
-        ChooseDate.Date[]? dates = Common.SelectDates(new DateTime(2000, 1, 1));
+        Calendar.Date[]? dates = SelectDates(new DateTime(2000, 1, 1));
         if (dates == null)
             return;
 
@@ -375,7 +390,7 @@ public partial class MainWindow : Window
 
     private async void ExtensionHyperlink_Click(object sender, RoutedEventArgs e)
     {
-        ChooseDate.Date[]? dates = Common.SelectDates(new DateTime(1978, 10, 26));
+        Calendar.Date[]? dates = SelectDates(new DateTime(1978, 10, 26));
         if (dates == null)
             return;
 
@@ -442,6 +457,6 @@ public partial class MainWindow : Window
 
     private void Window_Activated(object sender, EventArgs e)
     {
-        _modalDialog?.Activate();
+        _calendarDialog?.Activate();
     }
 }
