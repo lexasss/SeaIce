@@ -25,7 +25,7 @@ public partial class Calendar : Window, INotifyPropertyChanged
     }
 
     public static string[] Monthes => new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-    public static int[] Days => new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    public static int[] DayCount => new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
     public Date[] Dates => _dates.ToArray();
 
@@ -124,14 +124,14 @@ public partial class Calendar : Window, INotifyPropertyChanged
     private IEnumerable<int> GetDays()
     {
         var firstDay = _year == _startDate.Year && _month == _startDate.Month ? _startDate.Day : 1;
-        var lastDay = Days[_month - 1];
+        var lastDay = DayCount[_month - 1];
         if (_year == _endDate.Year && _month == _endDate.Month)
         {
             lastDay = _endDate.Day;
         }
         else
         {
-            if (_month == 1 && (_year % 4) == 0)
+            if (_month == 2 && (_year % 4) == 0 && ((_year % 100) != 0 || (_year % 400) == 0))
                 lastDay += 1;
         }
         var days = new List<int>();
