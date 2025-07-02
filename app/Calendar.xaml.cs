@@ -32,6 +32,21 @@ public partial class Calendar : Window, INotifyPropertyChanged
     public bool HasDates => _dates.Count > 0;
     public bool CanReturn => _stage == Stage.Month || _stage == Stage.Day;
     public string StageName => _stage.ToString();
+    public string Path
+    {
+        get
+        {
+            List<string> result = new();
+
+            if (_year > 0)
+                result.Add(_year.ToString());
+            if (_month > 0)
+                result.Add(Monthes[_month - 1]);
+            result.Add(""); // to get the closing slash
+
+            return @"\ " + string.Join(@" \ ", result);
+        }
+    }
 
     public readonly ObservableCollection<ListViewItem> CalendarItems = new();
 
@@ -97,8 +112,13 @@ public partial class Calendar : Window, INotifyPropertyChanged
             CalendarItems.Add(lvi);
         }
 
+        if (_stage <= Stage.Day) _day = 0;
+        if (_stage <= Stage.Month) _month = 0;
+        if (_stage <= Stage.Year) _year = 0;
+
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StageName)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CanReturn)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Path)));
     }
 
     private IEnumerable<int> GetDays()

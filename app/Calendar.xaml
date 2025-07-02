@@ -47,6 +47,8 @@
                     IsEnabled="{Binding CanReturn}"
                     Content="🠔"
                     Click="Back_Click"/>
+            <Label Content="{Binding Path}"
+                   VerticalAlignment="Center"/>
         </WrapPanel>
 
         <Label Grid.Row="0" Grid.Column="1"

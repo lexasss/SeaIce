@@ -9,8 +9,10 @@
         ui:ThemeManager.IsThemeAware="True"
         mc:Ignorable="d"
         Title="Ice Amount Calculator"
+        MinHeight="600"
+        MinWidth="832"
         Height="600"
-        Width="800"
+        Width="832"
         WindowState="Maximized"
         Icon="/images/icon.ico"
         Activated="Window_Activated">
@@ -36,21 +38,27 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0"
-                    Padding="8"
-                    HorizontalAlignment="Center">
-                    <Hyperlink Click="ThicknessHyperlink_Click">https://ocean.dmi.dk/arctic/icethickness/</Hyperlink>
-                </Label>
-                <Button x:Name="btnLoadThicknessImage" Grid.Row="1"
-                    Content="Open from a file..."
-                    HorizontalAlignment="Stretch"
-                    Padding="12"
-                    Click="LoadThicknessImage_Click"/>
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="0">
+                    <Label Padding="8"
+                           HorizontalAlignment="Center">
+                        <Hyperlink Click="ThicknessHyperlink_Click">https://ocean.dmi.dk/arctic/icethickness/</Hyperlink>
+                    </Label>
+                    <Label Width="{Binding ActualWidth, ElementName=lsvThicknessImages}"
+                           Margin="0"
+                           HorizontalAlignment="Right"
+                           Content="Dates"/>
+                    <Button x:Name="btnLoadThicknessImage"
+                            Content="..."
+                            ToolTip="Open from a file..."
+                            HorizontalAlignment="Right"
+                            Padding="12"
+                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                            Click="LoadThicknessImage_Click"/>
+                </Grid>
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition/>
@@ -58,7 +66,8 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" MinWidth="144">
                         <WrapPanel Margin="4,8">
-                            <Label Content="Ice amount:"/>
+                            <Label Content="Ice amount:"
+                                   Margin="6,0,0,0"/>
                             <Label x:Name="lblIceAmount"
                                    Margin="8,0,0,0"
                                    Content="0"/>
@@ -113,36 +122,37 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Slider x:Name="sldIceColorStep" Grid.Column="0"
-                                    Minimum="0.1"
-                                    Maximum="0.5"
-                                    SmallChange="0.01"
-                                    LargeChange="0.05"
-                                    Value="0.18"
-                                    Margin="4,8"
-                                    LostMouseCapture="IceColorThreshold_LostMouseCapture"
-                                    GotMouseCapture="IceColorThreshold_GotMouseCapture"
-                                    ValueChanged="IceColorThreshold_ValueChanged"/>
+                                        Minimum="0.1"
+                                        Maximum="0.5"
+                                        SmallChange="0.01"
+                                        LargeChange="0.05"
+                                        Value="0.18"
+                                        Margin="4,8"
+                                        LostMouseCapture="IceColorThreshold_LostMouseCapture"
+                                        GotMouseCapture="IceColorThreshold_GotMouseCapture"
+                                        ValueChanged="IceColorThreshold_ValueChanged"/>
                                 <Label Grid.Column="1"
-                                    MinWidth="36"
-                                    VerticalContentAlignment="Center"
-                                    ContentStringFormat=" {0:F2}"
-                                    Content="{Binding Value, ElementName=sldIceColorStep}"/>
+                                       MinWidth="36"
+                                       VerticalContentAlignment="Center"
+                                       ContentStringFormat=" {0:F2}"
+                                       Content="{Binding Value, ElementName=sldIceColorStep}"/>
                             </Grid>
                         </StackPanel>
                     </StackPanel>
                     <Image x:Name="imgThickness" Grid.Column="1"/>
                     <Label x:Name="lblThicknessWait" Grid.Column="1"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        FontSize="34"
-                        FontWeight="Bold"
-                        Foreground="LightGray"
-                        Content="Wait..."
-                        Visibility="Collapsed"/>
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           FontSize="34"
+                           FontWeight="Bold"
+                           Foreground="Yellow"
+                           Content="Wait..."
+                           Visibility="Collapsed"/>
                     <ListView x:Name="lsvThicknessImages" Grid.Column="2"
-                        MinWidth="120"
-                        KeyUp="ThicknessImages_KeyUp"
-                        SelectionChanged="ThicknessImages_SelectionChanged"/>
+                              MinWidth="120"
+                              VirtualizingPanel.IsVirtualizing="False"
+                              KeyUp="ThicknessImages_KeyUp"
+                              SelectionChanged="ThicknessImages_SelectionChanged"/>
                 </Grid>
             </Grid>
         </TabItem>
@@ -151,21 +161,27 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0"
-                    HorizontalAlignment="Center"
-                    Padding="8">
-                    <Hyperlink Click="ExtensionHyperlink_Click">ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/daily/images/</Hyperlink>
-                </Label>
-                <Button x:Name="btnLoadExtensionImage" Grid.Row="1"
-                    Content="Open from a file..."
-                    HorizontalAlignment="Stretch"
-                    Padding="12"
-                    Click="LoadExtensionImage_Click"/>
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="0">
+                    <Label HorizontalAlignment="Center"
+                           Padding="8">
+                        <Hyperlink Click="ExtensionHyperlink_Click">ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/daily/images/</Hyperlink>
+                    </Label>
+                    <Label Width="{Binding ActualWidth, ElementName=lsvExtensionImages}"
+                           Margin="0"
+                           HorizontalAlignment="Right"
+                           Content="Dates"/>
+                    <Button x:Name="btnLoadExtensionImage"
+                            Content="..."
+                            ToolTip="Open from a file..."
+                            HorizontalAlignment="Right"
+                            Padding="12"
+                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                            Click="LoadExtensionImage_Click"/>
+                </Grid>
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition/>
@@ -176,17 +192,17 @@
                     </StackPanel>
                     <Image x:Name="imgExtension" Grid.Column="1"/>
                     <Label x:Name="lblExtensionWait" Grid.Column="1"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        FontSize="34"
-                        FontWeight="Bold"
-                        Foreground="LightGray"
-                        Content="Wait..."
-                        Visibility="Collapsed"/>
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           FontSize="34"
+                           FontWeight="Bold"
+                           Foreground="LightGray"
+                           Content="Wait..."
+                           Visibility="Collapsed"/>
                     <ListView x:Name="lsvExtensionImages" Grid.Column="2"
-                        MinWidth="120"
-                        KeyUp="ExtensionImages_KeyUp"
-                        SelectionChanged="ExtensionImages_SelectionChanged"/>
+                              MinWidth="120"
+                              KeyUp="ExtensionImages_KeyUp"
+                              SelectionChanged="ExtensionImages_SelectionChanged"/>
                 </Grid>
             </Grid>
         </TabItem>
