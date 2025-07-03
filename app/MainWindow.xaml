@@ -8,7 +8,8 @@
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:ThemeManager.IsThemeAware="True"
         mc:Ignorable="d"
-        Title="Ice Amount Calculator"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="Sea Ice Image Browser"
         MinHeight="600"
         MinWidth="832"
         Height="600"
@@ -33,63 +34,57 @@
         </Style>
     </Window.Resources>
 
-    <TabControl>
-        <TabItem Header="Thickness">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+    <Grid>
+        <TabControl>
+            <TabItem Header="Thickness">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0">
-                    <Label Padding="8"
-                           HorizontalAlignment="Center">
-                        <Hyperlink Click="ThicknessHyperlink_Click">https://ocean.dmi.dk/arctic/icethickness/</Hyperlink>
-                    </Label>
-                    <Label Width="{Binding ActualWidth, ElementName=lsvThicknessImages}"
-                           Margin="0"
-                           HorizontalAlignment="Right"
-                           Content="Dates"/>
-                    <Button x:Name="btnLoadThicknessImage"
-                            Content="..."
-                            ToolTip="Open from a file..."
-                            HorizontalAlignment="Right"
-                            Padding="12"
-                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                            Click="LoadThicknessImage_Click"/>
-                </Grid>
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" MinWidth="144">
-                        <WrapPanel Margin="4,8">
-                            <Label Content="Ice amount:"
-                                   Margin="6,0,0,0"/>
-                            <Label x:Name="lblIceAmount"
-                                   Margin="8,0,0,0"
-                                   Content="0"/>
-                        </WrapPanel>
-                        <CheckBox x:Name="chkColorizeLand"
-                                  Content="Colorize land"
-                                  Checked="Colorize_Toggled"
-                                  Unchecked="Colorize_Toggled"/>
-                        <CheckBox x:Name="chkColorizeSea"
-                                  Content="Colorize sea"
-                                  Checked="Colorize_Toggled"
-                                  Unchecked="Colorize_Toggled"/>
-                        <CheckBox x:Name="chkColorizeRivers"
-                                  Content="Colorize rivers"
-                                  Checked="Colorize_Toggled"
-                                  Unchecked="Colorize_Toggled"/>
-                        <CheckBox x:Name="chkColorizeIce"
-                                  Content="Colorize ice"
-                                  IsChecked="True"
-                                  Checked="Colorize_Toggled"
-                                  Unchecked="Colorize_Toggled"/>
-                        <!--Grid Margin="4,4,0,0">
+                    <Grid Grid.Row="0">
+                        <Label Padding="8"
+                               HorizontalAlignment="Center">
+                            <Hyperlink Click="ThicknessHyperlink_Click">https://ocean.dmi.dk/arctic/icethickness/</Hyperlink>
+                        </Label>
+                        <Label Width="{Binding ActualWidth, ElementName=lsvThicknessImages}"
+                               Padding="14,0"
+                               HorizontalAlignment="Right"
+                               Content="Dates"/>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" MinWidth="144">
+                            <WrapPanel Margin="4,8">
+                                <Label Content="Ice amount:"
+                                       Margin="6,0,0,0"/>
+                                <Label x:Name="lblIceAmount"
+                                       Margin="8,0,0,0"
+                                       Content="0"/>
+                            </WrapPanel>
+                            <CheckBox x:Name="chkColorizeLand"
+                                      Content="Colorize land"
+                                      Checked="Colorize_Toggled"
+                                      Unchecked="Colorize_Toggled"/>
+                            <CheckBox x:Name="chkColorizeSea"
+                                      Content="Colorize sea"
+                                      Checked="Colorize_Toggled"
+                                      Unchecked="Colorize_Toggled"/>
+                            <CheckBox x:Name="chkColorizeRivers"
+                                      Content="Colorize rivers"
+                                      Checked="Colorize_Toggled"
+                                      Unchecked="Colorize_Toggled"/>
+                            <CheckBox x:Name="chkColorizeIce"
+                                      Content="Colorize ice"
+                                      IsChecked="True"
+                                      Checked="Colorize_Toggled"
+                                      Unchecked="Colorize_Toggled"/>
+                            <!--Grid Margin="4,4,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition Width="Auto"/>
@@ -114,97 +109,132 @@
                                              IsOn="True"
                                              Toggled="Colorize_Toggled"/>
                         </Grid-->
-                        <StackPanel Margin="20,0,0,0">
-                            <Label>Step</Label>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Slider x:Name="sldIceColorStep" Grid.Column="0"
-                                        Minimum="0.1"
-                                        Maximum="0.5"
-                                        SmallChange="0.01"
-                                        LargeChange="0.05"
-                                        Value="0.18"
-                                        Margin="4,8"
-                                        LostMouseCapture="IceColorThreshold_LostMouseCapture"
-                                        GotMouseCapture="IceColorThreshold_GotMouseCapture"
-                                        ValueChanged="IceColorThreshold_ValueChanged"/>
-                                <Label Grid.Column="1"
-                                       MinWidth="36"
-                                       VerticalContentAlignment="Center"
-                                       ContentStringFormat=" {0:F2}"
-                                       Content="{Binding Value, ElementName=sldIceColorStep}"/>
-                            </Grid>
+                            <StackPanel Margin="20,0,0,0">
+                                <Label>Step</Label>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Slider x:Name="sldIceColorStep" Grid.Column="0"
+                                            Minimum="0.1"
+                                            Maximum="0.5"
+                                            SmallChange="0.01"
+                                            LargeChange="0.05"
+                                            Value="0.18"
+                                            Margin="4,8"
+                                            LostMouseCapture="IceColorThreshold_LostMouseCapture"
+                                            GotMouseCapture="IceColorThreshold_GotMouseCapture"
+                                            ValueChanged="IceColorThreshold_ValueChanged"/>
+                                    <Label Grid.Column="1"
+                                           MinWidth="36"
+                                           VerticalContentAlignment="Center"
+                                           ContentStringFormat=" {0:F2}"
+                                           Content="{Binding Value, ElementName=sldIceColorStep}"/>
+                                </Grid>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
-                    <Image x:Name="imgThickness" Grid.Column="1"/>
-                    <Label x:Name="lblThicknessWait" Grid.Column="1"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           FontSize="34"
-                           FontWeight="Bold"
-                           Foreground="Yellow"
-                           Content="Wait..."
-                           Visibility="Collapsed"/>
-                    <ListView x:Name="lsvThicknessImages" Grid.Column="2"
-                              MinWidth="120"
-                              VirtualizingPanel.IsVirtualizing="False"
-                              KeyUp="ThicknessImages_KeyUp"
-                              SelectionChanged="ThicknessImages_SelectionChanged"/>
-                </Grid>
-            </Grid>
-        </TabItem>
+                        <Image x:Name="imgThickness" Grid.Column="1"/>
+                        <Label x:Name="lblThicknessWait" Grid.Column="1"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               FontSize="34"
+                               FontWeight="Bold"
+                               Foreground="Yellow"
+                               Content="Wait..."
+                               Visibility="Collapsed"/>
+                        <Grid Grid.Column="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <ListView x:Name="lsvThicknessImages" Grid.Row="0"
+                                      MinWidth="120"
+                                      VirtualizingPanel.IsVirtualizing="False"
+                                      KeyUp="ThicknessImages_KeyUp"
+                                      SelectionChanged="ThicknessImages_SelectionChanged"/>
+                            <Button x:Name="btnLoadThicknessImage" Grid.Row="1"
+                                    Content="..."
+                                    ToolTip="Open from a file..."
+                                    HorizontalAlignment="Right"
+                                    Padding="12"
+                                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                    Click="LoadThicknessImage_Click"/>
 
-        <TabItem Header="Extension">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </TabItem>
 
-                <Grid Grid.Row="0">
-                    <Label HorizontalAlignment="Center"
-                           Padding="8">
-                        <Hyperlink Click="ExtensionHyperlink_Click">ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/daily/images/</Hyperlink>
-                    </Label>
-                    <Label Width="{Binding ActualWidth, ElementName=lsvExtensionImages}"
-                           Margin="0"
-                           HorizontalAlignment="Right"
-                           Content="Dates"/>
-                    <Button x:Name="btnLoadExtensionImage"
-                            Content="..."
-                            ToolTip="Open from a file..."
-                            HorizontalAlignment="Right"
-                            Padding="12"
-                            Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                            Click="LoadExtensionImage_Click"/>
+            <TabItem Header="Extension">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Label HorizontalAlignment="Center"
+                               Padding="8">
+                            <Hyperlink Click="ExtensionHyperlink_Click">ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/daily/images/</Hyperlink>
+                        </Label>
+                        <Label Width="{Binding ActualWidth, ElementName=lsvExtensionImages}"
+                               Margin="0"
+                               HorizontalAlignment="Right"
+                               Content="Dates"/>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" MinWidth="144">
+                            <!-- options -->
+                        </StackPanel>
+                        <Image x:Name="imgExtension" Grid.Column="1"/>
+                        <Label x:Name="lblExtensionWait" Grid.Column="1"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               FontSize="34"
+                               FontWeight="Bold"
+                               Foreground="LightGray"
+                               Content="Wait..."
+                               Visibility="Collapsed"/>
+                        <Grid Grid.Column="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <ListView x:Name="lsvExtensionImages" Grid.Row="0"
+                                      MinWidth="120"
+                                      KeyUp="ExtensionImages_KeyUp"
+                                      SelectionChanged="ExtensionImages_SelectionChanged"/>
+                            <Button x:Name="btnLoadExtensionImage" Grid.Row="1"
+                                    Content="..."
+                                    ToolTip="Open from a file..."
+                                    HorizontalAlignment="Right"
+                                    Padding="12"
+                                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                    Click="LoadExtensionImage_Click"/>
+                        </Grid>
+                    </Grid>
                 </Grid>
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" MinWidth="144">
-                        <!-- options -->
-                    </StackPanel>
-                    <Image x:Name="imgExtension" Grid.Column="1"/>
-                    <Label x:Name="lblExtensionWait" Grid.Column="1"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           FontSize="34"
-                           FontWeight="Bold"
-                           Foreground="LightGray"
-                           Content="Wait..."
-                           Visibility="Collapsed"/>
-                    <ListView x:Name="lsvExtensionImages" Grid.Column="2"
-                              MinWidth="120"
-                              KeyUp="ExtensionImages_KeyUp"
-                              SelectionChanged="ExtensionImages_SelectionChanged"/>
-                </Grid>
-            </Grid>
-        </TabItem>
-    </TabControl>
+            </TabItem>
+        </TabControl>
+
+        <WrapPanel HorizontalAlignment="Right">
+            <WrapPanel.Resources>
+                <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                    <Setter Property="Padding" Value="9"/>
+                </Style>
+            </WrapPanel.Resources>
+            <ToggleButton IsChecked="{Binding IsThemeLight, Mode=TwoWay}">
+                <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE706;"/>
+            </ToggleButton>
+            <ToggleButton IsChecked="{Binding IsThemeDark, Mode=TwoWay}">
+                <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE708;"/>
+            </ToggleButton>
+        </WrapPanel>
+    </Grid>
 </Window>

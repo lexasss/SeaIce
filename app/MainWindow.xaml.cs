@@ -1,28 +1,57 @@
-﻿using System;
+﻿using ModernWpf;
+using SeaIce.ImageServices;
+using System;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using SeaIce.ImageServices;
 
 namespace SeaIce;
 
-public partial class MainWindow : Window
+public partial class MainWindow : Window, INotifyPropertyChanged
 {
+    public bool IsThemeLight
+    { 
+        get => ThemeManager.Current.ApplicationTheme == ApplicationTheme.Light;
+        set
+        {
+            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsThemeLight)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsThemeDark)));
+        }
+    }
+    public bool IsThemeDark
+    {
+        get => ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark;
+        set
+        {
+            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsThemeLight)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsThemeDark)));
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public MainWindow()
     {
         InitializeComponent();
         LoadExistingThicknessImages();
         LoadExistingExtensionImages();
+
+        DetectCurrentTheme();
     }
 
     // Internal
 
     ImageModifier? _modifier = null;
-    BitmapImage? _extImage = null;
     bool _isDraggingSlider = false;
     Calendar? _calendarDialog = null;
+
+    [System.Runtime.InteropServices.DllImport("UXTheme.dll", SetLastError = true, EntryPoint = "#138")]
+    private static extern bool ShouldSystemUseDarkMode();
 
     private void LoadExistingThicknessImages()
     {
@@ -43,6 +72,25 @@ public partial class MainWindow : Window
         foreach (var imageFilename in imageFilenames)
         {
             LoadExtensionImage(imageFilename, false);
+        }
+    }
+
+    private void DetectCurrentTheme()
+    {
+        try
+        {
+            if (ShouldSystemUseDarkMode())
+            {
+                IsThemeDark = true;
+            }
+            else
+            {
+                IsThemeLight = true;
+            }
+        }
+        catch
+        {
+            IsThemeLight = true;
         }
     }
 
@@ -107,12 +155,10 @@ public partial class MainWindow : Window
             bitmap.EndInit();
 
             imgExtension.Source = bitmap;
-            _extImage = bitmap;
         }
         else
         {
             imgExtension.Source = null;
-            _extImage = null;
         }
     }
 
@@ -242,7 +288,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            _extImage = null;
+            imgExtension.Source = null;
             MessageBox.Show(ex.Message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
@@ -458,5 +504,10 @@ public partial class MainWindow : Window
     private void Window_Activated(object sender, EventArgs e)
     {
         _calendarDialog?.Activate();
+    }
+
+    private void ToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+
     }
 }
