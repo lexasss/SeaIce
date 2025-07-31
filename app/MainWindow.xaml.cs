@@ -1,6 +1,7 @@
 ﻿using ModernWpf;
 using SeaIce.ImageServices;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
@@ -49,6 +50,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     ImageModifier? _modifier = null;
     bool _isDraggingSlider = false;
     Calendar? _calendarDialog = null;
+    bool _isUiFrozen = false;
 
     [System.Runtime.InteropServices.DllImport("UXTheme.dll", SetLastError = true, EntryPoint = "#138")]
     private static extern bool ShouldSystemUseDarkMode();
@@ -191,7 +193,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return null;
     }
 
-    public Calendar.Date[]? SelectDates(DateTime startDate, DateTime? endDate = null)
+    private Calendar.Date[]? SelectDates(DateTime startDate, DateTime? endDate = null)
     {
         Calendar.Date[]? result = null;
 
@@ -293,6 +295,37 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
 
         return result;
+    }
+
+    private bool DeleteSelectedImages(ListView listView, Action<object> executer)
+    {
+        var toRemove = new Queue<ListViewItem>();
+        try
+        {
+            foreach (ListViewItem lvi in listView.SelectedItems)
+            {
+                toRemove.Enqueue(lvi);
+
+                var imageTag = lvi.Tag;
+                executer(imageTag);
+            }
+        }
+        catch
+        {
+            MessageBox.Show("Some files were not removed", Title, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        bool shouldClearImage = toRemove.Count > 0;
+
+        _isUiFrozen = true;
+        while (toRemove.Count > 0)
+        {
+            var lvi = toRemove.Dequeue();
+            listView.Items.Remove(lvi);
+        }
+        _isUiFrozen = false;
+
+        return shouldClearImage;
     }
 
 
@@ -420,17 +453,20 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void ThicknessImages_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Delete && lsvThicknessImages.SelectedItem != null)
+        if (e.Key == Key.Delete)
         {
-            var lvi = (lsvThicknessImages.SelectedItem as ListViewItem)!;
-            var imageTag = lvi.Tag;
-            if (imageTag is ImageModifier modifier)
+            bool shouldClearImage = DeleteSelectedImages(lsvThicknessImages, tag =>
             {
-                modifier.DeleteFile();
-            }
+                if (tag is ImageModifier modifier)
+                {
+                    modifier.DeleteFile();
+                }
+            });
 
-            lsvThicknessImages.Items.Remove(lsvThicknessImages.SelectedItem);
-            SelectThicknessImage(null);
+            if (shouldClearImage)
+            {
+                SelectThicknessImage(null);
+            }
         }
     }
 
@@ -474,6 +510,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void ExtensionImages_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isUiFrozen)
+            return;
+
         if (lsvExtensionImages.SelectedItem != null)
         {
             var lvi = (lsvExtensionImages.SelectedItem as ListViewItem)!;
@@ -487,17 +526,20 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void ExtensionImages_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Delete && lsvExtensionImages.SelectedItem != null)
+        if (e.Key == Key.Delete)
         {
-            var lvi = (lsvExtensionImages.SelectedItem as ListViewItem)!;
-            var imageTag = lvi.Tag;
-            if (imageTag is string imageFilename)
+            bool shouldClearImage = DeleteSelectedImages(lsvExtensionImages, tag =>
             {
-                File.Delete(imageFilename);
-            }
+                if (tag is string imageFilename)
+                {
+                    File.Delete(imageFilename);
+                }
+            });
 
-            lsvExtensionImages.Items.Remove(lsvExtensionImages.SelectedItem);
-            SelectExtensionImage(null);
+            if (shouldClearImage)
+            {
+                SelectExtensionImage(null);
+            }
         }
     }
 
