@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SeaIce.ImageServices;
+using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using SeaIce.ImageServices;
 
 namespace SeaIce;
 
@@ -130,11 +130,19 @@ internal class ImageModifier
     };
 
     static readonly Point MAP_RECT_MIN = new(ICE_AREA[0].X, ICE_AREA[0].Y);
-    static readonly Point MAP_RECT_MAX = new(ICE_AREA[^2].X, ICE_AREA[^2].Y);
+    static readonly Point MAP_RECT_MAX = new(ICE_AREA[^2].X, 1); // ICE_AREA[^2].Y);
 
-    const double SCALE_START_X = 0.0316;    // rel pixels  23-538,575/728,631    44,1102/1400,1213
-    const double SCALE_END_X = 0.74;        // rel pixels
-    const double SCALE_Y = 0.911252;        // rel pixels
+    const float SCALE_START_X = 0.0316f;    // rel pixels  23-538,575/728,631    44,1102/1400,1213
+    const float SCALE_END_X = 0.74f;        // rel pixels
+    const float SCALE_Y = 0.9095238095f;    // rel pixels
+
+    static readonly System.Drawing.PointF[] SCALE_AREA = new System.Drawing.PointF[]
+    {
+            new System.Drawing.PointF(0.03026f, 0.907936508f),
+            new System.Drawing.PointF(0.77304f, 0.907936508f),
+            new System.Drawing.PointF(0.77304f, 0.922222222f),
+            new System.Drawing.PointF(0.03026f, 0.922222222f),
+    };
 
     const double SCALE_SIZE = 5;                    // meters
     const float MAP_RESOLUTION_PER_PIXEL = 12.5f;   // km
@@ -224,8 +232,8 @@ internal class ImageModifier
 
     private static Pixel[] CreateScale(Pixel[,] pixels, Size size)
     {
-        int scaleEndX = (int)(SCALE_END_X * size.Width);
         int scaleStartX = (int)(SCALE_START_X * size.Width);
+        int scaleEndX = (int)(SCALE_END_X * size.Width);
         int scaleY = (int)(SCALE_Y * size.Height);
 
         var scale = new Pixel[scaleEndX - scaleStartX];
@@ -245,8 +253,10 @@ internal class ImageModifier
             for (int y = 0; y < size.Height; y += 1)
             {
                 ref var pixel = ref pixels[x, y];
+                var relX = (float)(x / size.Width);
+                var relY = (float)(y / size.Height);
 
-                if (Pixel.IsInPolygon(ICE_AREA, (float)(x / size.Width), (float)(y / size.Height)))
+                if (Pixel.IsInPolygon(ICE_AREA, relX, relY))
                 {
                     pixel.IsMap = true;
 
@@ -262,6 +272,17 @@ internal class ImageModifier
 
                     pixel.IsLand = pixel.IceThickness == 0 && !pixel.IsSea;
                     pixel.IsRiver = pixel.IsLand && pixel.Red < 200 && pixel.Green < 200 && pixel.Blue > 200;
+                }
+                else if (Pixel.IsInPolygon(SCALE_AREA, relX, relY))
+                {
+                    pixel.IsScale = true;
+
+                    var (delta, scaleValue) = MapToScale(scale, size, ref pixel);
+                    if (delta < 100)
+                    {
+                        pixel.IceThickness = scaleValue;
+                        pixel.ScaleDelta = delta;
+                    }
                 }
             }
         }

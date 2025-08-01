@@ -13,6 +13,7 @@ public struct Pixel
     public byte Alpha;
 
     public bool IsMap;
+    public bool IsScale;
     public bool IsLand;
     public bool IsRiver;
     public bool IsSea;
