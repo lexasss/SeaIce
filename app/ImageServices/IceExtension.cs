@@ -10,6 +10,9 @@ internal static class IceExtension
 {
     public static string ServerName = "sidads.colorado.edu";
     public static string DataPath => "/DATASETS/NOAA/G02135/north/daily/images/";
+    public static string ImageType => "conc";
+    public static string ImageResolution => "hires";
+    public static string ImageVersion => "4.0";
     public static string ImageLocalFolder => "extension";
 
     static IceExtension()
@@ -29,7 +32,7 @@ internal static class IceExtension
     public static async Task<string?> DownloadImage(int year, int month, int day)
     {
         var (remoteFolder, remoteFilename) = GetImagePath(year, month, day);
-        string localFilePath = Path.Combine(ImageLocalFolder, remoteFilename);
+        string localPath = Path.Combine(ImageLocalFolder, remoteFilename);
 
         bool isDownloaded = false;
         var token = new CancellationToken();
@@ -38,15 +41,16 @@ internal static class IceExtension
         await ftp.Connect(token);
         try
         {
-            isDownloaded = await ftp.DownloadFile(localFilePath, DataPath + remoteFolder + remoteFilename, FtpLocalExists.Overwrite, token: token) == FtpStatus.Success;
+            var remotePath = DataPath + remoteFolder + remoteFilename;
+            isDownloaded = await ftp.DownloadFile(localPath, remotePath, FtpLocalExists.Overwrite, token: token) == FtpStatus.Success;
         }
         catch (Exception) { }
 
-        return isDownloaded ? localFilePath : null;
+        return isDownloaded ? localPath : null;
     }
 
     // Internal
 
     private static (string, string) GetImagePath(int year, int month, int day) =>
-        ($"{year}/{month:D2}_{Calendar.Monthes[month - 1]}/", $"N_{year}{month:D2}{day:D2}_conc_hires_v3.0.png");
+        ($"{year}/{month:D2}_{Calendar.Monthes[month - 1]}/", $"N_{year}{month:D2}{day:D2}_{ImageType}_{ImageResolution}_v{ImageVersion}.png");
 }
