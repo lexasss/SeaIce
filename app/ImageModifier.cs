@@ -147,6 +147,10 @@ internal class ImageModifier
     const double SCALE_SIZE = 5;                    // meters
     const float MAP_RESOLUTION_PER_PIXEL = 12.5f;   // km
 
+    const int COLOR_THRESHOLD = 200;
+    const int ICE_DELTA_THRESHOLD = 50;
+    const int SCALE_DELTA_THRESHOLD = 100;
+
     static readonly Brush LAND_BRUSH = Brushes.ForestGreen;
     static readonly Brush SEA_BRUSH = Brushes.PaleTurquoise;
     static readonly Brush RIVERS_BRUSH = Brushes.DeepSkyBlue;
@@ -260,25 +264,32 @@ internal class ImageModifier
                 {
                     pixel.IsMap = true;
 
-                    pixel.IsSea = pixel.Red > 200 && pixel.Green > 200 && pixel.Blue > 200;
+                    pixel.IsSea = 
+                        pixel.Red > COLOR_THRESHOLD && 
+                        pixel.Green > COLOR_THRESHOLD && 
+                        pixel.Blue > COLOR_THRESHOLD;
 
                     var (delta, scaleValue) = MapToScale(scale, size, ref pixel);
 
-                    if (delta < 50)
+                    if (delta < ICE_DELTA_THRESHOLD)
                     {
                         pixel.IceThickness = scaleValue;
                         pixel.ScaleDelta = delta;
                     }
 
                     pixel.IsLand = pixel.IceThickness == 0 && !pixel.IsSea;
-                    pixel.IsRiver = pixel.IsLand && pixel.Red < 200 && pixel.Green < 200 && pixel.Blue > 200;
+                    pixel.IsRiver = 
+                        pixel.IsLand && 
+                        pixel.Red < COLOR_THRESHOLD && 
+                        pixel.Green < COLOR_THRESHOLD && 
+                        pixel.Blue > COLOR_THRESHOLD;
                 }
                 else if (Pixel.IsInPolygon(SCALE_AREA, relX, relY))
                 {
                     pixel.IsScale = true;
 
                     var (delta, scaleValue) = MapToScale(scale, size, ref pixel);
-                    if (delta < 100)
+                    if (delta < SCALE_DELTA_THRESHOLD)
                     {
                         pixel.IceThickness = scaleValue;
                         pixel.ScaleDelta = delta;
