@@ -34,6 +34,36 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
+    public bool IsPlaying
+    {
+        get;
+        set
+        {
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPlaying)));
+            if (value)
+            {
+                _player.Play(((TabItem)tclDomains.SelectedItem)?.Header switch
+                {
+                    "Extension" => lsvExtensionImages,
+                    "Thickness" => lsvThicknessImages,
+                    _ => null
+                });
+            }
+            else
+            {
+                _player.Stop();
+            }
+        }
+    }
+
+    public bool HasImages => ((TabItem)tclDomains.SelectedItem)?.Header switch
+    {
+        "Extension" => lsvExtensionImages.Items.Count > 0,
+        "Thickness" => lsvThicknessImages.Items.Count > 0,
+        _ => false
+    };
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public MainWindow()
@@ -46,6 +76,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     }
 
     // Internal
+
+    readonly Player _player = new();
 
     ImageModifier? _modifier = null;
     bool _isDraggingSlider = false;
@@ -548,8 +580,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _calendarDialog?.Activate();
     }
 
-    private void ToggleButton_Click(object sender, RoutedEventArgs e)
+    private void PlayImages_Click(object sender, RoutedEventArgs e)
     {
+        IsPlaying = !IsPlaying;
+    }
 
+    private void Domains_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasImages)));
     }
 }

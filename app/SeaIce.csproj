@@ -2,20 +2,23 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>images\icon.ico</ApplicationIcon>
+    <ApplicationIcon>assets\images\icon.ico</ApplicationIcon>
+	<LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="assets\images\play.png" />
+    <None Remove="assets\images\stop.png" />
     <None Remove="ImageServices\Common.cs~RF76880f1.TMP" />
     <None Remove="ImageServices\Common.cs~RF9348ede.TMP" />
     <None Remove="images\icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="images\icon.ico">
+    <Content Include="assets\images\icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -24,6 +27,15 @@
     <PackageReference Include="DebounceThrottle" Version="2.0.0" />
     <PackageReference Include="FluentFTP" Version="47.1.0" />
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="assets\images\play.png" />
+    <Resource Include="assets\images\stop.png" />
   </ItemGroup>
 
 </Project>

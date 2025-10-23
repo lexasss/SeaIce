@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SeaIce"
+        xmlns:conv="clr-namespace:SeaIce.Converters"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:ThemeManager.IsThemeAware="True"
@@ -15,10 +16,12 @@
         Height="600"
         Width="832"
         WindowState="Maximized"
-        Icon="/images/icon.ico"
+        Icon="/assets/images/icon.ico"
         Activated="Window_Activated">
 
     <Window.Resources>
+        <conv:InverseBool x:Key="not"/>
+        
         <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,8,0"/>
@@ -35,8 +38,10 @@
     </Window.Resources>
 
     <Grid>
-        <TabControl>
-            <TabItem Header="Thickness">
+        <TabControl x:Name="tclDomains"
+                    SelectionChanged="Domains_SelectionChanged">
+            <TabItem Header="Thickness"
+                     IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -45,7 +50,8 @@
 
                     <Grid Grid.Row="0">
                         <Label Padding="8"
-                               HorizontalAlignment="Center">
+                               HorizontalAlignment="Center"
+                               IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}">
                             <Hyperlink Click="ThicknessHyperlink_Click">https://ocean.dmi.dk/arctic/icethickness/</Hyperlink>
                         </Label>
                         <Label Width="{Binding ActualWidth, ElementName=lsvThicknessImages}"
@@ -59,7 +65,9 @@
                             <ColumnDefinition/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" MinWidth="144">
+                        <StackPanel Grid.Column="0"
+                                    MinWidth="144"
+                                    IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}">
                             <WrapPanel Margin="4,8">
                                 <Label Content="Ice amount:"
                                        Margin="6,0,0,0"/>
@@ -153,20 +161,44 @@
                                       VirtualizingPanel.IsVirtualizing="False"
                                       KeyUp="ThicknessImages_KeyUp"
                                       SelectionChanged="ThicknessImages_SelectionChanged"/>
-                            <Button x:Name="btnLoadThicknessImage" Grid.Row="1"
-                                    Content="..."
-                                    ToolTip="Open from a file..."
-                                    HorizontalAlignment="Right"
-                                    Padding="12"
-                                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                    Click="LoadThicknessImage_Click"/>
-
+                            <WrapPanel Grid.Row="1"
+                                       HorizontalAlignment="Right">
+                                <Button ToolTip="Plot two images together"
+                                        Padding="12"
+                                        Margin="4"
+                                        VerticalAlignment="Stretch"
+                                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                        IsEnabled="{Binding HasImages}"
+                                        Click="PlayImages_Click">
+                                    <Image>
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Source" Value="/assets/images/play.png"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                                        <Setter Property="Source" Value="/assets/images/stop.png"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Button>
+                                <Button x:Name="btnLoadThicknessImage" 
+                                        Content="..."
+                                        ToolTip="Open from a file..."
+                                        Padding="12"
+                                        Margin="4"
+                                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                        IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}"
+                                        Click="LoadThicknessImage_Click"/>
+                            </WrapPanel>
                         </Grid>
                     </Grid>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Extension">
+            <TabItem Header="Extension"
+                     IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -175,7 +207,8 @@
 
                     <Grid Grid.Row="0">
                         <Label HorizontalAlignment="Center"
-                               Padding="8">
+                               Padding="8"
+                               IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}">
                             <Hyperlink Click="ExtensionHyperlink_Click">ftp://sidads.colorado.edu/DATASETS/NOAA/G02135/north/daily/images/</Hyperlink>
                         </Label>
                         <Label Width="{Binding ActualWidth, ElementName=lsvExtensionImages}"
@@ -210,13 +243,39 @@
                                       MinWidth="120"
                                       KeyUp="ExtensionImages_KeyUp"
                                       SelectionChanged="ExtensionImages_SelectionChanged"/>
-                            <Button x:Name="btnLoadExtensionImage" Grid.Row="1"
-                                    Content="..."
-                                    ToolTip="Open from a file..."
-                                    HorizontalAlignment="Right"
-                                    Padding="12"
-                                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                    Click="LoadExtensionImage_Click"/>
+                            <WrapPanel Grid.Row="1"
+                                       HorizontalAlignment="Right">
+                                <Button ToolTip="Plot two images together"
+                                        Padding="12"
+                                        Margin="4"
+                                        VerticalAlignment="Stretch"
+                                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                        IsEnabled="{Binding HasImages}"
+                                        Click="PlayImages_Click">
+                                    <Image>
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Source" Value="/assets/images/play.png"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                                        <Setter Property="Source" Value="/assets/images/stop.png"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Button>
+                                <Button x:Name="btnLoadExtensionImage" Grid.Row="1"
+                                        Content="..."
+                                        ToolTip="Open from a file..."
+                                        HorizontalAlignment="Right"
+                                        Padding="12"
+                                        Margin="4"
+                                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                        IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}"
+                                        Click="LoadExtensionImage_Click"/>
+                            </WrapPanel>
+
                         </Grid>
                     </Grid>
                 </Grid>
