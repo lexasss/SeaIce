@@ -10,22 +10,17 @@ namespace SeaIce;
 
 public partial class Calendar : Window, INotifyPropertyChanged
 {
-    public class Date
+    public class Date(int year, int month, int day)
     {
-        public int Year { get; init; }
-        public int Month { get; init; }
-        public int Day { get; init; }
-        public Date(int year, int month, int day)
-        {
-            Year = year;
-            Month = month;
-            Day = day;
-        }
+        public int Year { get; init; } = year;
+        public int Month { get; init; } = month;
+        public int Day { get; init; } = day;
+
         public override string ToString() => $"{Year} {Month:D2} {Day:D2}";
     }
 
-    public static string[] Monthes => new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-    public static int[] DayCount => new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    public static string[] Monthes => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    public static int[] DayCount => [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     public Date[] Dates => _dates.ToArray();
 
@@ -36,7 +31,7 @@ public partial class Calendar : Window, INotifyPropertyChanged
     {
         get
         {
-            List<string> result = new();
+            List<string> result = [];
 
             if (_year > 0)
                 result.Add(_year.ToString());
@@ -48,7 +43,7 @@ public partial class Calendar : Window, INotifyPropertyChanged
         }
     }
 
-    public readonly ObservableCollection<ListViewItem> CalendarItems = new();
+    public readonly ObservableCollection<ListViewItem> CalendarItems = [];
 
     public Calendar(DateTime startDate, DateTime endDate)
     {
@@ -80,13 +75,13 @@ public partial class Calendar : Window, INotifyPropertyChanged
     readonly DateTime _startDate;
     readonly DateTime _endDate;
 
-    List<int> _years = new();
+    readonly List<int> _years = [];
+    readonly List<Date> _dates = [];
 
     Stage _stage;
     int _year = 0;
     int _month = 0;
     int _day = 0;
-    List<Date> _dates = new();
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -121,7 +116,7 @@ public partial class Calendar : Window, INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Path)));
     }
 
-    private IEnumerable<int> GetDays()
+    private List<int> GetDays()
     {
         var firstDay = _year == _startDate.Year && _month == _startDate.Month ? _startDate.Day : 1;
         var lastDay = DayCount[_month - 1];
@@ -183,7 +178,7 @@ public partial class Calendar : Window, INotifyPropertyChanged
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Dates)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasDates)));
 
-            SetStage(Stage.Year);
+            //SetStage(Stage.Year);
         }
     }
 

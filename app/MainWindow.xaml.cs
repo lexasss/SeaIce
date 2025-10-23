@@ -7,7 +7,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
 
 namespace SeaIce;
 
@@ -79,7 +78,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     readonly Player _player = new();
 
-    ImageModifier? _modifier = null;
+    ThicknessImageModifier? _thicknessModifier = null;
+    ExtensionImageModifier? _extensionModifier = null;
     bool _isDraggingSlider = false;
     Calendar? _calendarDialog = null;
     bool _isUiFrozen = false;
@@ -128,7 +128,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private void ResetView()
+    private void ResetThicknessView()
     {
         lblIceAmount.Content = "";
     }
@@ -138,18 +138,21 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (imgThickness == null)
             return;
 
-        ImageModifier.PixelOperation operation = ImageModifier.PixelOperation.None;
-        if (chkColorizeLand.IsChecked ?? false) operation |= ImageModifier.PixelOperation.ColorizeLand;
-        if (chkColorizeRivers.IsChecked ?? false) operation |= ImageModifier.PixelOperation.ColorizeRivers;
-        if (chkColorizeSea.IsChecked ?? false) operation |= ImageModifier.PixelOperation.ColorizeSea;
-        if (chkColorizeIce.IsChecked ?? false) operation |= ImageModifier.PixelOperation.ColorizeIce;
-        /*if (tgsColorizeLand.IsOn) operation |= ImageModifier.PixelOperation.ColorizeLand;
-        if (tgsColorizeRivers.IsOn) operation |= ImageModifier.PixelOperation.ColorizeRivers;
-        if (tgsColorizeSea.IsOn) operation |= ImageModifier.PixelOperation.ColorizeSea;
-        if (tgsColorizeIce.IsOn) operation |= ImageModifier.PixelOperation.ColorizeIce;
-        */
+        ThicknessImageModifier.PixelOperation operation = ThicknessImageModifier.PixelOperation.None;
+        if (chkColorizeLand.IsChecked ?? false) operation |= ThicknessImageModifier.PixelOperation.ColorizeLand;
+        if (chkColorizeRivers.IsChecked ?? false) operation |= ThicknessImageModifier.PixelOperation.ColorizeRivers;
+        if (chkColorizeSea.IsChecked ?? false) operation |= ThicknessImageModifier.PixelOperation.ColorizeSea;
+        if (chkColorizeIce.IsChecked ?? false) operation |= ThicknessImageModifier.PixelOperation.ColorizeIce;
 
-        imgThickness.Source = _modifier?.RedrawImage(operation);
+        imgThickness.Source = _thicknessModifier?.RedrawImage(operation);
+    }
+
+    private void UpdateExtensionImage()
+    {
+        if (imgExtension == null)
+            return;
+
+        imgExtension.Source = _extensionModifier?.Bitmap;
     }
 
     private void UpdateThicknessImageIce()
@@ -157,29 +160,33 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         //if (tgsColorizeIce.IsOn &&
         if (chkColorizeIce.IsChecked == true &&
             _isDraggingSlider == false &&
-            _modifier != null &&
-            _modifier.IceColorStep != sldIceColorStep.Value)
+            _thicknessModifier != null &&
+            _thicknessModifier.IceColorStep != sldIceColorStep.Value)
         {
-            _modifier.IceColorStep = sldIceColorStep.Value;
+            _thicknessModifier.IceColorStep = sldIceColorStep.Value;
             UpdateThicknessImage();
         }
     }
 
-    private void SelectThicknessImage(ImageModifier? modifier)
+    private void SelectThicknessImage(ThicknessImageModifier? modifier)
     {
-        _modifier = modifier;
+        _thicknessModifier = modifier;
 
-        ResetView();
+        ResetThicknessView();
         UpdateThicknessImage();
 
-        if (_modifier != null)
+        if (_thicknessModifier != null)
         {
-            lblIceAmount.Content = $"{_modifier.GetIceAmount() / 1000:F1}t km3";
+            lblIceAmount.Content = $"{_thicknessModifier.GetIceAmount() / 1000:F1}t km3";
         }
     }
 
-    private void SelectExtensionImage(string? imageName)
+    private void SelectExtensionImage(ExtensionImageModifier? modifier /*string? imageName*/)
     {
+        _extensionModifier = modifier;
+        UpdateExtensionImage();
+
+        /*
         if (imageName != null)
         {
             var bitmap = new BitmapImage();
@@ -193,7 +200,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         else
         {
             imgExtension.Source = null;
-        }
+        }*/
     }
 
     private void Disable(Label waitingLabel)
@@ -253,10 +260,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            ImageModifier? modifier = null;
+            ThicknessImageModifier? modifier = null;
             if (prepare)
             {
-                modifier = new ImageModifier(filename)
+                modifier = new ThicknessImageModifier(filename)
                 {
                     IceColorStep = sldIceColorStep.Value
                 };
@@ -281,7 +288,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            _modifier = null;
+            _thicknessModifier = null;
             MessageBox.Show(ex.Message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
@@ -303,6 +310,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
+            ExtensionImageModifier? modifier = null;
+            if (select)
+            {
+                modifier = new ExtensionImageModifier(filename);
+            }
+
             lsvExtensionImages.SelectedItem = null;
             lsvExtensionImages.Items.Add(new ListViewItem()
             {
@@ -315,13 +328,15 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
             if (select)
             {
-                SelectExtensionImage(filename);
+                SelectExtensionImage(modifier);
+                //SelectExtensionImage(filename);
             }
 
             result = true;
         }
         catch (Exception ex)
         {
+            _thicknessModifier = null;
             imgExtension.Source = null;
             MessageBox.Show(ex.Message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
@@ -465,11 +480,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             var lvi = (lsvThicknessImages.SelectedItem as ListViewItem)!;
             var imageTag = lvi.Tag;
-            if (imageTag is not ImageModifier modifier)
+            if (imageTag is not ThicknessImageModifier modifier)
             {
                 Disable(lblThicknessWait);
 
-                modifier = new ImageModifier((string)imageTag)
+                modifier = new ThicknessImageModifier((string)imageTag)
                 {
                     IceColorStep = sldIceColorStep.Value
                 };
@@ -489,9 +504,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             bool shouldClearImage = DeleteSelectedImages(lsvThicknessImages, tag =>
             {
-                if (tag is ImageModifier modifier)
+                if (tag is ThicknessImageModifier modifier1)
                 {
-                    modifier.DeleteFile();
+                    modifier1.DeleteFile();
+                }
+                else if (tag is ExtensionImageModifier modifier2)
+                {
+                    modifier2.DeleteFile();
                 }
             });
 
@@ -549,10 +568,23 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             var lvi = (lsvExtensionImages.SelectedItem as ListViewItem)!;
             var imageTag = lvi.Tag;
-            if (imageTag is string imageFilename)
+            /*if (imageTag is string imageFilename)
             {
                 SelectExtensionImage(imageFilename);
             }
+            */
+            if (imageTag is not ExtensionImageModifier modifier)
+            {
+                Disable(lblExtensionWait);
+
+                modifier = new ExtensionImageModifier((string)imageTag);
+
+                Enable(lblExtensionWait);
+
+                lvi.Tag = modifier;
+            }
+
+            SelectExtensionImage(modifier);
         }
     }
 

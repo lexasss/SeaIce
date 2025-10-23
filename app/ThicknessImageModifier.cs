@@ -6,7 +6,7 @@ using System.Windows.Media.Imaging;
 
 namespace SeaIce;
 
-internal class ImageModifier
+internal class ThicknessImageModifier
 {
     [Flags]
     public enum PixelOperation
@@ -22,7 +22,7 @@ internal class ImageModifier
 
     public double IceColorStep { get; set; } = 0.2; // 1 meter
 
-    public ImageModifier(string filename)
+    public ThicknessImageModifier(string filename)
     {
         _filename = filename;
         _bitmap = BitmapFromUri(new Uri(filename));
@@ -274,6 +274,7 @@ internal class ImageModifier
                     if (delta < ICE_DELTA_THRESHOLD)
                     {
                         pixel.IceThickness = scaleValue;
+                        pixel.IsIce = scaleValue > 0;
                         pixel.ScaleDelta = delta;
                     }
 

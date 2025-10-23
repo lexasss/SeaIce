@@ -17,6 +17,7 @@ public struct Pixel
     public bool IsLand;
     public bool IsRiver;
     public bool IsSea;
+    public bool IsIce;
     public double IceThickness;
     public int ScaleDelta;
 
