@@ -21,7 +21,7 @@
 
     <Window.Resources>
         <conv:InverseBool x:Key="not"/>
-        
+
         <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,8,0"/>
@@ -151,48 +151,11 @@
                                Foreground="Yellow"
                                Content="Wait..."
                                Visibility="Collapsed"/>
-                        <Grid Grid.Column="2">
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <ListView x:Name="lsvThicknessImages" Grid.Row="0"
-                                      MinWidth="120"
-                                      VirtualizingPanel.IsVirtualizing="False"
-                                      KeyUp="ThicknessImages_KeyUp"
-                                      SelectionChanged="ThicknessImages_SelectionChanged"/>
-                            <WrapPanel Grid.Row="1"
-                                       HorizontalAlignment="Right">
-                                <Button ToolTip="Plot two images together"
-                                        Padding="12"
-                                        Margin="4"
-                                        VerticalAlignment="Stretch"
-                                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                        IsEnabled="{Binding HasImages}"
-                                        Click="PlayImages_Click">
-                                    <Image>
-                                        <Image.Style>
-                                            <Style TargetType="Image">
-                                                <Setter Property="Source" Value="/assets/images/play.png"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                                        <Setter Property="Source" Value="/assets/images/stop.png"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Image.Style>
-                                    </Image>
-                                </Button>
-                                <Button x:Name="btnLoadThicknessImage" 
-                                        Content="..."
-                                        ToolTip="Open from a file..."
-                                        Padding="12"
-                                        Margin="4"
-                                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                        IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}"
-                                        Click="LoadThicknessImage_Click"/>
-                            </WrapPanel>
-                        </Grid>
+                        <ListView x:Name="lsvThicknessImages" Grid.Column="2"
+                                    MinWidth="120"
+                                    VirtualizingPanel.IsVirtualizing="False"
+                                    KeyUp="ThicknessImages_KeyUp"
+                                    SelectionChanged="ThicknessImages_SelectionChanged"/>
                     </Grid>
                 </Grid>
             </TabItem>
@@ -231,69 +194,85 @@
                                HorizontalAlignment="Center"
                                FontSize="34"
                                FontWeight="Bold"
-                               Foreground="LightGray"
+                               Foreground="Yellow"
                                Content="Wait..."
                                Visibility="Collapsed"/>
-                        <Grid Grid.Column="2">
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <ListView x:Name="lsvExtensionImages" Grid.Row="0"
-                                      MinWidth="120"
-                                      KeyUp="ExtensionImages_KeyUp"
-                                      SelectionChanged="ExtensionImages_SelectionChanged"/>
-                            <WrapPanel Grid.Row="1"
-                                       HorizontalAlignment="Right">
-                                <Button ToolTip="Plot two images together"
-                                        Padding="12"
-                                        Margin="4"
-                                        VerticalAlignment="Stretch"
-                                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                        IsEnabled="{Binding HasImages}"
-                                        Click="PlayImages_Click">
-                                    <Image>
-                                        <Image.Style>
-                                            <Style TargetType="Image">
-                                                <Setter Property="Source" Value="/assets/images/play.png"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                                        <Setter Property="Source" Value="/assets/images/stop.png"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Image.Style>
-                                    </Image>
-                                </Button>
-                                <Button x:Name="btnLoadExtensionImage" Grid.Row="1"
-                                        Content="..."
-                                        ToolTip="Open from a file..."
-                                        HorizontalAlignment="Right"
-                                        Padding="12"
-                                        Margin="4"
-                                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                                        IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}"
-                                        Click="LoadExtensionImage_Click"/>
-                            </WrapPanel>
-
-                        </Grid>
+                        <ListView x:Name="lsvExtensionImages" Grid.Column="2"
+                                  MinWidth="120"
+                                  KeyUp="ExtensionImages_KeyUp"
+                                  SelectionChanged="ExtensionImages_SelectionChanged"/>
                     </Grid>
                 </Grid>
             </TabItem>
         </TabControl>
 
-        <WrapPanel HorizontalAlignment="Right">
+        <WrapPanel HorizontalAlignment="Right"
+                   VerticalAlignment="Top"
+                   Height="40">
             <WrapPanel.Resources>
                 <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
                     <Setter Property="Padding" Value="9"/>
                 </Style>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Padding" Value="8"/>
+                    <Setter Property="Height" Value="40"/>
+                </Style>
             </WrapPanel.Resources>
-            <ToggleButton IsChecked="{Binding IsThemeLight, Mode=TwoWay}">
-                <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE706;"/>
-            </ToggleButton>
-            <ToggleButton IsChecked="{Binding IsThemeDark, Mode=TwoWay}">
-                <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE708;"/>
-            </ToggleButton>
+            <WrapPanel Margin="0,0,8,0">
+                <Button ToolTip="Loops over all images"
+                        VerticalAlignment="Stretch"
+                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                        IsEnabled="{Binding HasImages}"
+                        Click="PlayImages_Click">
+                    <Image>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Source" Value="/assets/images/play.png"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                        <Setter Property="Source" Value="/assets/images/stop.png"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </Button>
+                <Button ToolTip="Combines two images"
+                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                        Click="CombineTwoImages_Click">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                            <Setter Property="Opacity" Value="0.5"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsPlaying}" Value="False"/>
+                                        <Condition Binding="{Binding SelectedImageCount}" Value="2"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Image Source="/assets/images/combine.png"/>
+                </Button>
+                <Button ToolTip="Load from a file..."
+                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                        IsEnabled="{Binding IsPlaying, Converter={StaticResource not}}"
+                        Click="LoadImage_Click">
+                    <Image Source="/assets/images/open.png"/>
+                </Button>
+            </WrapPanel>
+            <WrapPanel>
+                <ToggleButton IsChecked="{Binding IsThemeLight, Mode=TwoWay}">
+                    <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE706;"/>
+                </ToggleButton>
+                <ToggleButton IsChecked="{Binding IsThemeDark, Mode=TwoWay}">
+                    <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE708;"/>
+                </ToggleButton>
+            </WrapPanel>
         </WrapPanel>
     </Grid>
 </Window>

@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SeaIce.ImageServices;
+namespace SeaIce.Services;
 
 internal static class IceExtension
 {
@@ -24,6 +24,12 @@ internal static class IceExtension
     }
 
     public static string CreateName(string filename)
+    {
+        var date = filename.Split('\\')[^1].Split("_")[1];
+        return $"{date[0..4]} {date[4..6]} {date[6..]}";
+    }
+
+    public static string GetFriendlyImageName(string filename)
     {
         var date = filename.Split('\\')[^1].Split("_")[1];
         return $"{date[0..4]} {date[4..6]} {date[6..]}";

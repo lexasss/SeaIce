@@ -1,5 +1,5 @@
 ﻿using ModernWpf;
-using SeaIce.ImageServices;
+using SeaIce.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,10 +10,17 @@ using System.Windows.Input;
 
 namespace SeaIce;
 
+enum Domain
+{
+    Unknown,
+    Thickness,
+    Extension
+}
+
 public partial class MainWindow : Window, INotifyPropertyChanged
 {
     public bool IsThemeLight
-    { 
+    {
         get => ThemeManager.Current.ApplicationTheme == ApplicationTheme.Light;
         set
         {
@@ -56,11 +63,18 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    public bool HasImages => ((TabItem)tclDomains.SelectedItem)?.Header switch
+    public bool HasImages => this.Domain switch
     {
-        "Extension" => lsvExtensionImages.Items.Count > 0,
-        "Thickness" => lsvThicknessImages.Items.Count > 0,
+        Domain.Extension => lsvExtensionImages.Items.Count > 0,
+        Domain.Thickness => lsvThicknessImages.Items.Count > 0,
         _ => false
+    };
+
+    public int SelectedImageCount => this.Domain switch
+    {
+        Domain.Extension => lsvExtensionImages.SelectedItems.Count,
+        Domain.Thickness => lsvThicknessImages.SelectedItems.Count,
+        _ => 0
     };
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -83,6 +97,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     bool _isDraggingSlider = false;
     Calendar? _calendarDialog = null;
     bool _isUiFrozen = false;
+
+    private Domain Domain => ((TabItem)tclDomains.SelectedItem)?.Header switch
+    {
+        "Extension" => Domain.Extension,
+        "Thickness" => Domain.Thickness,
+        _ => Domain.Unknown
+    };
 
     [System.Runtime.InteropServices.DllImport("UXTheme.dll", SetLastError = true, EntryPoint = "#138")]
     private static extern bool ShouldSystemUseDarkMode();
@@ -375,8 +396,51 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return shouldClearImage;
     }
 
+    private IModifier? EnsureLviTagIsModifier(object? lviObj, Type type, Label wait)
+    {
+        if (lviObj is not ListViewItem lvi)
+            return null;
 
-    // UI handlers
+        var imageTag = lvi.Tag;
+
+        if (imageTag is string tag)
+        {
+            Disable(wait);
+
+            object modifier;
+            if (type == typeof(ExtensionImageModifier))
+                modifier = new ExtensionImageModifier(tag);
+            else if (type == typeof(ThicknessImageModifier))
+                modifier = new ThicknessImageModifier(tag)
+                {
+                    IceColorStep = sldIceColorStep.Value
+                };
+            else
+            {
+                return lvi.Tag as IModifier;
+            }
+
+            Enable(wait);
+
+            lvi.Tag = modifier;
+        }
+
+        return lvi.Tag as IModifier;
+    }
+
+
+    // UI event handlers
+
+    private void Window_Activated(object sender, EventArgs e)
+    {
+        _calendarDialog?.Activate();
+    }
+
+    private void Domains_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasImages)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedImageCount)));
+    }
 
     private async void ThicknessHyperlink_Click(object sender, RoutedEventArgs e)
     {
@@ -403,42 +467,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             }
         }
 
-        /*
-
-        Disable(lblThicknessWait);
-
-        var links = await ThinknessImageService.GetLinks();
-
-        Enable(lblThicknessWait);
-
-        if (links == null)
-            return;
-
-        _modalDialog = new ChooseImage();
-        _modalDialog.SetLinks(links.Reverse().ToArray());
-        var selectedImages = _modalDialog.ShowDialog() ?? false ? _modalDialog.GetSelectedImages() : null;
-        _modalDialog = null;
-
-        if (selectedImages == null)
-            return;
-
-        Disable(lblThicknessWait);
-
-        foreach (var imageName in selectedImages)
-        {
-            var filename = await ThinknessImageService.DownloadImage(imageName);
-            if (!string.IsNullOrEmpty(filename))
-            {
-                var fullfilename = Path.GetFullPath(filename);
-                LoadThicknessImage(fullfilename, true);
-            }
-        }
-        //*/
-
         Enable(lblThicknessWait);
     }
 
-    private void LoadThicknessImage_Click(object sender, RoutedEventArgs e)
+    private void LoadImage_Click(object sender, RoutedEventArgs e)
     {
         var ofd = new Microsoft.Win32.OpenFileDialog
         {
@@ -447,9 +479,18 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         if (ofd.ShowDialog() ?? false)
         {
-            Disable(lblThicknessWait);
-            LoadThicknessImage(ofd.FileName, true);
-            Enable(lblThicknessWait);
+            var lblWait = this.Domain == Domain.Thickness ? lblThicknessWait : null;
+
+            if (lblWait != null)
+                Disable(lblWait);
+
+            if (this.Domain == Domain.Thickness)
+                LoadThicknessImage(ofd.FileName, true);
+            else if (this.Domain == Domain.Extension)
+                LoadExtensionImage(ofd.FileName, true);
+
+            if (lblWait != null)
+                Enable(lblWait);
         }
     }
 
@@ -476,25 +517,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void ThicknessImages_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedImageCount)));
+
         if (lsvThicknessImages.SelectedItem != null)
         {
-            var lvi = (lsvThicknessImages.SelectedItem as ListViewItem)!;
-            var imageTag = lvi.Tag;
-            if (imageTag is not ThicknessImageModifier modifier)
-            {
-                Disable(lblThicknessWait);
-
-                modifier = new ThicknessImageModifier((string)imageTag)
-                {
-                    IceColorStep = sldIceColorStep.Value
-                };
-
-                Enable(lblThicknessWait);
-
-                lvi.Tag = modifier;
-            }
-
-            SelectThicknessImage(modifier);
+            var modifier = EnsureLviTagIsModifier(lsvThicknessImages.SelectedItem, typeof(ThicknessImageModifier), lblThicknessWait);
+            if (modifier is ThicknessImageModifier thicknessModifier)
+                SelectThicknessImage(thicknessModifier);
         }
     }
 
@@ -504,14 +533,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             bool shouldClearImage = DeleteSelectedImages(lsvThicknessImages, tag =>
             {
-                if (tag is ThicknessImageModifier modifier1)
-                {
-                    modifier1.DeleteFile();
-                }
-                else if (tag is ExtensionImageModifier modifier2)
-                {
-                    modifier2.DeleteFile();
-                }
+                (tag as IModifier)?.DeleteFile();
             });
 
             if (shouldClearImage)
@@ -546,45 +568,18 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         Enable(lblExtensionWait);
     }
 
-    private void LoadExtensionImage_Click(object sender, RoutedEventArgs e)
-    {
-        var ofd = new Microsoft.Win32.OpenFileDialog
-        {
-            Filter = "PNG images|*.png"
-        };
-
-        if (ofd.ShowDialog() ?? false)
-        {
-            LoadExtensionImage(ofd.FileName, true);
-        }
-    }
-
     private void ExtensionImages_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_isUiFrozen)
             return;
 
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedImageCount)));
+
         if (lsvExtensionImages.SelectedItem != null)
         {
-            var lvi = (lsvExtensionImages.SelectedItem as ListViewItem)!;
-            var imageTag = lvi.Tag;
-            /*if (imageTag is string imageFilename)
-            {
-                SelectExtensionImage(imageFilename);
-            }
-            */
-            if (imageTag is not ExtensionImageModifier modifier)
-            {
-                Disable(lblExtensionWait);
-
-                modifier = new ExtensionImageModifier((string)imageTag);
-
-                Enable(lblExtensionWait);
-
-                lvi.Tag = modifier;
-            }
-
-            SelectExtensionImage(modifier);
+            var modifier = EnsureLviTagIsModifier(lsvExtensionImages.SelectedItem, typeof(ExtensionImageModifier), lblExtensionWait);
+            if (modifier is ExtensionImageModifier extensionModifier)
+                SelectExtensionImage(extensionModifier);
         }
     }
 
@@ -607,18 +602,28 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private void Window_Activated(object sender, EventArgs e)
-    {
-        _calendarDialog?.Activate();
-    }
-
     private void PlayImages_Click(object sender, RoutedEventArgs e)
     {
         IsPlaying = !IsPlaying;
     }
 
-    private void Domains_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void CombineTwoImages_Click(object sender, RoutedEventArgs e)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasImages)));
+        var (img, lsv, type, wait) = Domain switch {
+            Domain.Thickness => (imgThickness, lsvThicknessImages, typeof(ThicknessImageModifier), lblThicknessWait),
+            Domain.Extension => (imgExtension, lsvExtensionImages, typeof(ExtensionImageModifier), lblExtensionWait),
+            _ => throw new Exception("Unknown domain")
+        };
+
+        if (lsv.SelectedItems.Count != 2)
+            return;
+
+        var modifier1 = EnsureLviTagIsModifier(lsv.SelectedItems[0], type, wait);
+        var modifier2 = EnsureLviTagIsModifier(lsv.SelectedItems[1], type, wait);
+
+        if (modifier1 != null && modifier2 != null)
+        {
+            img.Source = ImageCombiner.Combine(modifier1.Bitmap, modifier2.Bitmap, modifier1.Name, modifier2.Name);
+        }
     }
 }

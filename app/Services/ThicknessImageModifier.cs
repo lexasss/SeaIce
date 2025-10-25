@@ -1,12 +1,11 @@
-﻿using SeaIce.ImageServices;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace SeaIce;
+namespace SeaIce.Services;
 
-internal class ThicknessImageModifier
+internal class ThicknessImageModifier : IModifier
 {
     [Flags]
     public enum PixelOperation
@@ -21,6 +20,8 @@ internal class ThicknessImageModifier
     public string Name { get; private set; }
 
     public double IceColorStep { get; set; } = 0.2; // 1 meter
+
+    public BitmapSource Bitmap => _bitmap;
 
     public ThicknessImageModifier(string filename)
     {

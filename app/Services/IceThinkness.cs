@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace SeaIce.ImageServices;
+namespace SeaIce.Services;
 
 internal static class IceThinkness
 {

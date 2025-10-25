@@ -10,11 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="assets\images\open.png" />
     <None Remove="assets\images\play.png" />
     <None Remove="assets\images\stop.png" />
     <None Remove="Converters.cs~RFeab02e5.TMP" />
-    <None Remove="ImageServices\Common.cs~RF76880f1.TMP" />
-    <None Remove="ImageServices\Common.cs~RF9348ede.TMP" />
+    <None Remove="Services\Common.cs~RF76880f1.TMP" />
+    <None Remove="Services\Common.cs~RF9348ede.TMP" />
+    <None Remove="Services\ImageCombiner.cs~RF1417795e.TMP" />
     <None Remove="images\icon.ico" />
   </ItemGroup>
 
@@ -35,6 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="assets\images\combine.png" />
+    <Resource Include="assets\images\open.png" />
     <Resource Include="assets\images\play.png" />
     <Resource Include="assets\images\stop.png" />
   </ItemGroup>
