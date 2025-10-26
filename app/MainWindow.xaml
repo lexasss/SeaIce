@@ -239,7 +239,7 @@
                 </Button>
                 <Button ToolTip="Combines two images"
                         Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-                        Click="CombineTwoImages_Click">
+                        Click="CombineTwoExtensionImages_Click">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                             <Setter Property="IsEnabled" Value="False"/>
@@ -249,6 +249,7 @@
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding IsPlaying}" Value="False"/>
                                         <Condition Binding="{Binding SelectedImageCount}" Value="2"/>
+                                        <Condition Binding="{Binding IsExtensionDomain}" Value="True"/>
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="IsEnabled" Value="True"/>
                                     <Setter Property="Opacity" Value="1"/>

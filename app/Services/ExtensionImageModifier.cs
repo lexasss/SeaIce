@@ -5,7 +5,7 @@ using System.Windows.Media.Imaging;
 
 namespace SeaIce.Services;
 
-internal class ExtensionImageModifier : IModifier
+internal class ExtensionImageModifier : IImageModifier
 {
     public static readonly System.Drawing.PointF[] ICE_AREA =
     [

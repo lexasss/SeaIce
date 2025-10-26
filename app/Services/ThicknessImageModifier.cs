@@ -5,7 +5,7 @@ using System.Windows.Media.Imaging;
 
 namespace SeaIce.Services;
 
-internal class ThicknessImageModifier : IModifier
+internal class ThicknessImageModifier : IImageModifier
 {
     [Flags]
     public enum PixelOperation

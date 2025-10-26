@@ -77,6 +77,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _ => 0
     };
 
+    public bool IsExtensionDomain => this.Domain == Domain.Extension;
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public MainWindow()
@@ -396,7 +398,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return shouldClearImage;
     }
 
-    private IModifier? EnsureLviTagIsModifier(object? lviObj, Type type, Label wait)
+    private IImageModifier? EnsureLviTagIsModifier(object? lviObj, Type type, Label wait)
     {
         if (lviObj is not ListViewItem lvi)
             return null;
@@ -417,7 +419,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 };
             else
             {
-                return lvi.Tag as IModifier;
+                return lvi.Tag as IImageModifier;
             }
 
             Enable(wait);
@@ -425,7 +427,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             lvi.Tag = modifier;
         }
 
-        return lvi.Tag as IModifier;
+        return lvi.Tag as IImageModifier;
     }
 
 
@@ -440,6 +442,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasImages)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedImageCount)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsExtensionDomain)));
     }
 
     private async void ThicknessHyperlink_Click(object sender, RoutedEventArgs e)
@@ -533,7 +536,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             bool shouldClearImage = DeleteSelectedImages(lsvThicknessImages, tag =>
             {
-                (tag as IModifier)?.DeleteFile();
+                (tag as IImageModifier)?.DeleteFile();
             });
 
             if (shouldClearImage)
@@ -593,6 +596,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 {
                     File.Delete(imageFilename);
                 }
+                else if (tag is IImageModifier modifier)
+                {
+                    modifier.DeleteFile();
+                }
             });
 
             if (shouldClearImage)
@@ -607,23 +614,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         IsPlaying = !IsPlaying;
     }
 
-    private void CombineTwoImages_Click(object sender, RoutedEventArgs e)
+    private void CombineTwoExtensionImages_Click(object sender, RoutedEventArgs e)
     {
-        var (img, lsv, type, wait) = Domain switch {
-            Domain.Thickness => (imgThickness, lsvThicknessImages, typeof(ThicknessImageModifier), lblThicknessWait),
-            Domain.Extension => (imgExtension, lsvExtensionImages, typeof(ExtensionImageModifier), lblExtensionWait),
-            _ => throw new Exception("Unknown domain")
-        };
-
-        if (lsv.SelectedItems.Count != 2)
+        if (lsvExtensionImages.SelectedItems.Count != 2)
             return;
 
-        var modifier1 = EnsureLviTagIsModifier(lsv.SelectedItems[0], type, wait);
-        var modifier2 = EnsureLviTagIsModifier(lsv.SelectedItems[1], type, wait);
+        var modifier1 = EnsureLviTagIsModifier(lsvExtensionImages.SelectedItems[0], typeof(ExtensionImageModifier), lblExtensionWait);
+        var modifier2 = EnsureLviTagIsModifier(lsvExtensionImages.SelectedItems[1], typeof(ExtensionImageModifier), lblExtensionWait);
 
         if (modifier1 != null && modifier2 != null)
         {
-            img.Source = ImageCombiner.Combine(modifier1.Bitmap, modifier2.Bitmap, modifier1.Name, modifier2.Name);
+            imgExtension.Source = ExtensionImageCombiner.Combine(modifier1.Bitmap, modifier2.Bitmap, modifier1.Name, modifier2.Name);
         }
     }
 }

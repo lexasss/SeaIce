@@ -2,7 +2,7 @@
 
 namespace SeaIce.Services;
 
-internal interface IModifier
+internal interface IImageModifier
 {
     string Name { get; }
     BitmapSource Bitmap { get; }

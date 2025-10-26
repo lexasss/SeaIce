@@ -6,7 +6,7 @@ using System.Windows.Media.Imaging;
 
 namespace SeaIce.Services;
 
-internal class ImageCombiner
+internal class ExtensionImageCombiner
 {
     public static BitmapSource Combine(BitmapSource image1, BitmapSource image2, string name1, string name2)
     {
@@ -58,9 +58,9 @@ internal class ImageCombiner
 
                 if (y < 100)
                 {
-                    result[offset + 0] = 79;
-                    result[offset + 1] = 79;
-                    result[offset + 2] = 79;
+                    result[offset + 0] = bytes1[0];
+                    result[offset + 1] = bytes1[1];
+                    result[offset + 2] = bytes1[2];
                 }
                 else if (isIce1 && isIce2)
                 {
@@ -104,12 +104,13 @@ internal class ImageCombiner
             dc.DrawImage(bmp, rect);
 
             var lbl1 = new FormattedText(name1, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
-                new Typeface("Arial"), 60, new SolidColorBrush(Color.FromRgb(R1, G1, B1)));
+                new Typeface("Arial"), 60, new SolidColorBrush(Color.FromRgb(R1, G1, B1)), 1.25);
             dc.DrawText(lbl1, new Point(60, 30));
 
             var lbl2 = new FormattedText(name2, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
-                new Typeface("Arial"), 60, new SolidColorBrush(Color.FromRgb(R2, G2, B2)));
+                new Typeface("Arial"), 60, new SolidColorBrush(Color.FromRgb(R2, G2, B2)), 1.25);
             dc.DrawText(lbl2, new Point(700, 30));
+
             dc.Close();
         }
 
